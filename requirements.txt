@@ -1,0 +1,6 @@
+pytest>=7.4
+fyers_apiv3>=3.0
+fastapi>=0.115
+uvicorn[standard]>=0.30
+websockets>=12
+python-dotenv>=1.0
