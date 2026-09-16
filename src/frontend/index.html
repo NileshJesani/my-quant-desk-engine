@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>MyQuantDesk – NIFTY Options</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    h1 { font-size: 1.4rem; }
+    table { border-collapse: collapse; width: 100%; font-size: 0.85rem; }
+    th, td { border: 1px solid #ccc; padding: 4px 6px; text-align: right; }
+    th { background: #f5f5f5; text-align: center; }
+    td.symbol { text-align: left; }
+    #spot { font-weight: bold; }
+    .loading { color: #666; font-style: italic; }
+  </style>
+</head>
+<body>
+  <h1>MyQuantDesk – NIFTY Options Greeks</h1>
+  <div id="spot">Spot LTP: <span class="loading">Loading...</span></div>
+  <h2>Option Chain</h2>
+  <table id="chain">
+    <thead>
+      <tr>
+        <th>Symbol</th>
+        <th>Strike</th>
+        <th>Type</th>
+        <th>LTP</th>
+        <th>IV</th>
+        <th>Delta</th>
+        <th>Gamma</th>
+        <th>Theta</th>
+        <th>Vega</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td colspan="9" class="loading">Loading...</td></tr>
+    </tbody>
+  </table>
+
+  <script>
+    async function loadSnapshot() {
+      try {
+        const res = await fetch('/snapshot');
+        if (!res.ok) throw new Error('Failed to fetch snapshot');
+        const data = await res.json();
+        document.getElementById('spot').textContent =
+          'Spot LTP: ' + (data.spot_ltp ?? 'N/A');
+
+        const tbody = document.querySelector('#chain tbody');
+        tbody.innerHTML = '';
+        if (!data.options || data.options.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="9" class="loading">No options data</td></tr>';
+          return;
+        }
+        data.options.forEach(opt => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td class="symbol">${opt.symbol}</td>
+            <td>${opt.strike_price}</td>
+            <td>${opt.option_type}</td>
+            <td>${opt.ltp}</td>
+            <td>${opt.iv ?? ''}</td>
+            <td>${opt.delta ?? ''}</td>
+            <td>${opt.gamma ?? ''}</td>
+            <td>${opt.theta ?? ''}</td>
+            <td>${opt.vega ?? ''}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } catch (err) {
+        document.getElementById('spot').textContent = 'Error loading data';
+        console.error(err);
+      }
+    }
+
+    loadSnapshot();
+  </script>
+</body>
+</html>
