@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>MyQuantDesk – Vega</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="/static/css/main.css" />
+  <style>
+    .content { max-width: 800px; margin: 0 auto; }
+    .content h2 { font-size: 1.25rem; margin-top: 24px; }
+    .content p { line-height: 1.6; }
+    .example-box {
+      background: #f0f7ff;
+      border-left: 4px solid var(--ce);
+      padding: 12px 16px;
+      margin: 16px 0;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div id="topNav"></div>
+  <div id="optionsTabs"></div>
+
+  <div class="content">
+    <h1>Vega</h1>
+    <p>
+      Vega measures how much an option’s price changes for a 1% change in implied volatility (IV).
+      It tells you how sensitive your position is to “fear” or “complacency” in the market.
+    </p>
+
+    <h2>Why vega matters</h2>
+    <ul>
+      <li>Before events (Budget, RBI policy, global data), IV often rises → vega helps long options.</li>
+      <li>After events, IV often collapses → vega hurts long options, helps short options.</li>
+      <li>Even if your directional view is right, a big IV drop can reduce profits or cause losses.</li>
+    </ul>
+
+    <h2>Simple example</h2>
+    <div class="example-box">
+      A NIFTY 23450 CE has vega = 12.0 (per unit).
+      <br/>
+      If IV increases by 5%, the option price might increase by roughly:
+      <br/>
+      12.0 × 5 = ₹60 (per unit). For 1 lot (25 units), that’s ₹1,500.
+    </div>
+
+    <h2>Typical vega behavior</h2>
+    <ul>
+      <li>ATM and near-ATM options have higher vega.</li>
+      <li>Longer-dated options have higher vega (more time for IV to matter).</li>
+      <li>Very near expiry, vega drops; theta and gamma dominate.</li>
+    </ul>
+
+    <h2>Using vega in your trading</h2>
+    <ul>
+      <li>Long vega (long options): benefits from IV rising; suffers from IV crush.</li>
+      <li>Short vega (short options): benefits from IV falling; suffers from IV spikes.</li>
+      <li>Consider entering long options when IV is relatively low, and short options when IV is relatively high.</li>
+    </ul>
+
+    <p style="margin-top:24px;">
+      <strong>Next:</strong> Learn how IV and OI together shape the option chain in the <a href="/options/learn/iv-oi">IV & OI Basics</a> article.
+    </p>
+  </div>
+
+  <script src="/static/js/nav.js"></script>
+  <script>
+    renderTopNav();
+    renderOptionsTabs('learn');
+  </script>
+</body>
+</html>

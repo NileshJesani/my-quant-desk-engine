@@ -122,6 +122,71 @@ async def get_greek_meter():
         )
     return FileResponse(str(meter_path))
 
+@app.get("/options/learn")
+async def get_learn():
+    learn_path = frontend_dir / "learn.html"
+    if not learn_path.exists():
+        return JSONResponse(
+            status_code=500,
+            content={"error": "frontend/learn.html not found"},
+        )
+    return FileResponse(str(learn_path))
+
+
+@app.get("/options/learn/delta")
+async def get_learn_delta():
+    path = frontend_dir / "learn-delta.html"
+    if not path.exists():
+        return JSONResponse(
+            status_code=500,
+            content={"error": "frontend/learn-delta.html not found"},
+        )
+    return FileResponse(str(path))
+
+
+@app.get("/options/learn/gamma")
+async def get_learn_gamma():
+    path = frontend_dir / "learn-gamma.html"
+    if not path.exists():
+        return JSONResponse(
+            status_code=500,
+            content={"error": "frontend/learn-gamma.html not found"},
+        )
+    return FileResponse(str(path))
+
+
+@app.get("/options/learn/theta")
+async def get_learn_theta():
+    path = frontend_dir / "learn-theta.html"
+    if not path.exists():
+        return JSONResponse(
+            status_code=500,
+            content={"error": "frontend/learn-theta.html not found"},
+        )
+    return FileResponse(str(path))
+
+
+@app.get("/options/learn/vega")
+async def get_learn_vega():
+    path = frontend_dir / "learn-vega.html"
+    if not path.exists():
+        return JSONResponse(
+            status_code=500,
+            content={"error": "frontend/learn-vega.html not found"},
+        )
+    return FileResponse(str(path))
+
+
+@app.get("/options/learn/iv-oi")
+async def get_learn_iv_oi():
+    path = frontend_dir / "learn-iv-oi.html"
+    if not path.exists():
+        return JSONResponse(
+            status_code=500,
+            content={"error": "frontend/learn-iv-oi.html not found"},
+        )
+    return FileResponse(str(path))
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

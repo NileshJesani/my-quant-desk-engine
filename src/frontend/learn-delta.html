@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>MyQuantDesk – Delta</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="/static/css/main.css" />
+  <style>
+    .content {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .content h2 {
+      font-size: 1.25rem;
+      margin-top: 24px;
+    }
+    .content p {
+      line-height: 1.6;
+    }
+    .example-box {
+      background: #f0f7ff;
+      border-left: 4px solid var(--ce);
+      padding: 12px 16px;
+      margin: 16px 0;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div id="topNav"></div>
+  <div id="optionsTabs"></div>
+
+  <div class="content">
+    <h1>Delta</h1>
+    <p>
+      Delta tells you roughly how much an option’s price will change for a ₹1 move in the underlying (NIFTY).
+      It’s often described as “probability-like”, but for traders it’s more useful to think in terms of P&L sensitivity.
+    </p>
+
+    <h2>What delta means in practice</h2>
+    <p>
+      If a NIFTY 23450 CE has a delta of 0.35 and NIFTY moves up by 50 points, the option price should increase by roughly:
+    </p>
+    <div class="example-box">
+      0.35 × 50 = ₹17.5 (per unit). For 1 lot (25 units), that’s about ₹437.5.
+    </div>
+    <p>
+      This is approximate – gamma, IV changes, and time decay will also affect the actual move – but delta is the first-order effect.
+    </p>
+
+    <h2>Typical delta ranges</h2>
+    <ul>
+      <li>Deep OTM options: delta close to 0 (e.g., 0.05–0.15).</li>
+      <li>ATM options: delta around 0.45–0.55 for calls, −0.45 to −0.55 for puts.</li>
+      <li>Deep ITM options: delta close to 1 (calls) or −1 (puts).</li>
+    </ul>
+
+    <h2>How delta changes</h2>
+    <p>
+      Delta is not constant. It changes with:
+    </p>
+    <ul>
+      <li><strong>Spot moves:</strong> As NIFTY moves, OTM options can become ATM/ITM and delta increases (for calls).</li>
+      <li><strong>Time:</strong> Near expiry, delta of OTM options drops faster; ATM delta stays high.</li>
+      <li><strong>IV:</strong> Higher IV tends to “spread” delta across strikes; lower IV concentrates it near ATM.</li>
+    </ul>
+
+    <h2>Using delta in your trading</h2>
+    <p>
+      Common uses:
+    </p>
+    <ul>
+      <li>Estimating directional exposure: net delta ≈ how much your portfolio behaves like NIFTY.</li>
+      <li>Choosing strikes: higher delta = more directional, lower delta = cheaper but less responsive.</li>
+      <li>Hedging: you can offset delta using futures or other options.</li>
+    </ul>
+
+    <p style="margin-top:24px;">
+      <strong>Next:</strong> See how delta itself changes with gamma in the <a href="/options/learn/gamma">Gamma</a> article.
+    </p>
+  </div>
+
+  <script src="/static/js/nav.js"></script>
+  <script>
+    renderTopNav();
+    renderOptionsTabs('learn');
+  </script>
+</body>
+</html>

@@ -4,7 +4,39 @@
   <meta charset="UTF-8" />
   <title>MyQuantDesk – Greek Risk Meter</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <link rel="stylesheet" href="/static/css/main.css" />
+  <style>
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      margin-top: 16px;
+    }
+    @media (min-width: 900px) {
+      .grid-2 {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    .positions-table {
+      width: 100%;
+      font-size: 0.85rem;
+      margin-top: 8px;
+    }
+    .positions-table th, .positions-table td {
+      border: 1px solid #ddd;
+      padding: 6px 8px;
+      text-align: right;
+    }
+    .positions-table th {
+      background: #f5f5f5;
+      text-align: center;
+      font-weight: 600;
+    }
+    .positions-table td.symbol-cell {
+      text-align: left;
+    }
+  </style>
 </head>
 <body>
   <div id="topNav"></div>
@@ -13,21 +45,346 @@
   <h1>Greek Risk Meter</h1>
 
   <div class="card">
-    <h3>Overview</h3>
-    <p>
-      This tool will show your portfolio Greeks (delta, gamma, theta, vega) and how they change
-      with moves in NIFTY, IV, and time. Currently a placeholder – full functionality coming soon.
+    <h3>Portfolio Summary (Sample)</h3>
+    <p style="color:var(--muted);font-size:0.9rem;">
+      This is a demo portfolio to illustrate Greek risk. You can adjust the sample positions in the code.
     </p>
+
+    <div class="stats-bar">
+      <div class="stat-card">
+        <div class="label">Net Delta</div>
+        <div class="value" id="netDelta">--</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Net Gamma</div>
+        <div class="value" id="netGamma">--</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Net Theta</div>
+        <div class="value" id="netTheta">--</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Net Vega</div>
+        <div class="value" id="netVega">--</div>
+      </div>
+    </div>
+
+    <h3>Positions</h3>
+    <table class="positions-table" id="positionsTable">
+      <thead>
+        <tr>
+          <th>Symbol</th>
+          <th>Qty</th>
+          <th>Delta</th>
+          <th>Gamma</th>
+          <th>Theta</th>
+          <th>Vega</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td colspan="6" class="loading">Loading...</td></tr>
+      </tbody>
+    </table>
   </div>
 
-  <div class="card">
-    <h3>What you’ll see here</h3>
-    <ul>
-      <li>Net delta, gamma, theta, and vega for your positions.</li>
-      <li>Stress tests: impact of ±1% move in NIFTY, ±5–10% move in IV.</li>
-      <li>Time decay projection over days/weeks.</li>
-    </ul>
+  <div class="grid-2">
+    <div class="card">
+      <h3>P&L Impact: Spot Shock</h3>
+      <table class="positions-table" id="spotShockTable">
+        <thead>
+          <tr>
+            <th>Spot Move</th>
+            <th>Est. P&L</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td colspan="2" class="loading">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h3>P&L Impact: IV Shock</h3>
+      <table class="positions-table" id="ivShockTable">
+        <thead>
+          <tr>
+            <th>IV Move</th>
+            <th>Est. P&L</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td colspan="2" class="loading">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
   </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <h3>Net Delta vs Spot</h3>
+      <canvas id="deltaChart"></canvas>
+    </div>
+    <div class="card">
+      <h3>Net P&L vs Spot</h3>
+      <canvas id="pnlChart"></canvas>
+    </div>
+  </div>
+
+  <script>
+    // Sample underlying spot
+    const SPOT = 23000;
+
+    // Sample positions (for demo)
+    // Each position: symbol, qty (positive=long, negative=short), and Greeks per option
+    const positions = [
+      {
+        symbol: "NIFTY 22 SEP 26 23450 CE",
+        qty: 2, // lots
+        delta: 0.35,
+        gamma: 0.0002,
+        theta: -8.5,
+        vega: 12.0,
+      },
+      {
+        symbol: "NIFTY 22 SEP 26 23000 PE",
+        qty: -1, // short
+        delta: -0.45,
+        gamma: 0.00025,
+        theta: -7.0,
+        vega: 11.0,
+      },
+      {
+        symbol: "NIFTY 22 SEP 26 23200 CE",
+        qty: 1,
+        delta: 0.55,
+        gamma: 0.00018,
+        theta: -9.0,
+        vega: 13.0,
+      },
+    ];
+
+    // Approximate lot size (NIFTY = 25)
+    const LOT_SIZE = 25;
+
+    function computeNetGreeks(positions) {
+      let netDelta = 0;
+      let netGamma = 0;
+      let netTheta = 0;
+      let netVega = 0;
+
+      positions.forEach(pos => {
+        const factor = pos.qty * LOT_SIZE;
+        netDelta += pos.delta * factor;
+        netGamma += pos.gamma * factor;
+        netTheta += pos.theta * factor;
+        netVega += pos.vega * factor;
+      });
+
+      return { netDelta, netGamma, netTheta, netVega };
+    }
+
+    function renderPositionsTable(positions) {
+      const tbody = document.querySelector('#positionsTable tbody');
+      tbody.innerHTML = '';
+
+      positions.forEach(pos => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="symbol-cell">${pos.symbol}</td>
+          <td>${pos.qty}</td>
+          <td>${pos.delta.toFixed(3)}</td>
+          <td>${pos.gamma.toFixed(5)}</td>
+          <td>${pos.theta.toFixed(2)}</td>
+          <td>${pos.vega.toFixed(2)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderNetGreeks() {
+      const { netDelta, netGamma, netTheta, netVega } = computeNetGreeks(positions);
+
+      document.getElementById('netDelta').textContent = netDelta.toFixed(2);
+      document.getElementById('netGamma').textContent = netGamma.toFixed(4);
+      document.getElementById('netTheta').textContent = netTheta.toFixed(2);
+      document.getElementById('netVega').textContent = netVega.toFixed(2);
+    }
+
+    function estimatePnL_SpotShock(positions, spotMovePct) {
+      // Approximate P&L using delta and gamma
+      // ΔS = spotMovePct * SPOT
+      const dS = spotMovePct * SPOT;
+      let pnl = 0;
+
+      positions.forEach(pos => {
+        const factor = pos.qty * LOT_SIZE;
+        // First-order: delta * dS
+        // Second-order: 0.5 * gamma * dS^2
+        const deltaPnL = pos.delta * dS * factor;
+        const gammaPnL = 0.5 * pos.gamma * dS * dS * factor;
+        pnl += deltaPnL + gammaPnL;
+      });
+
+      return pnl;
+    }
+
+    function estimatePnL_IVShock(positions, ivMovePct) {
+      // Approximate P&L using vega
+      // ivMovePct is relative, e.g. 0.10 for +10%
+      let pnl = 0;
+
+      positions.forEach(pos => {
+        const factor = pos.qty * LOT_SIZE;
+        // vega is per 1% IV change? We'll assume per 1.0 (100%) for simplicity
+        // So for 10% move: vega * 0.10
+        const vegaPnL = pos.vega * ivMovePct * factor;
+        pnl += vegaPnL;
+      });
+
+      return pnl;
+    }
+
+    function renderSpotShockTable() {
+      const shocks = [
+        { label: '−2%', value: -0.02 },
+        { label: '−1%', value: -0.01 },
+        { label: '+1%', value: 0.01 },
+        { label: '+2%', value: 0.02 },
+      ];
+
+      const tbody = document.querySelector('#spotShockTable tbody');
+      tbody.innerHTML = '';
+
+      shocks.forEach(s => {
+        const pnl = estimatePnL_SpotShock(positions, s.value);
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${s.label}</td>
+          <td>${pnl.toFixed(2)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderIvShockTable() {
+      const shocks = [
+        { label: '−10%', value: -0.10 },
+        { label: '−5%', value: -0.05 },
+        { label: '+5%', value: 0.05 },
+        { label: '+10%', value: 0.10 },
+      ];
+
+      const tbody = document.querySelector('#ivShockTable tbody');
+      tbody.innerHTML = '';
+
+      shocks.forEach(s => {
+        const pnl = estimatePnL_IVShock(positions, s.value);
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${s.label}</td>
+          <td>${pnl.toFixed(2)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderDeltaVsSpotChart() {
+      const spotMoves = [-0.03, -0.02, -0.01, 0, 0.01, 0.02, 0.03];
+      const labels = spotMoves.map(m => `${m >= 0 ? '+' : ''}${(m * 100).toFixed(0)}%`);
+      const data = spotMoves.map(m => {
+        const newSpot = SPOT * (1 + m);
+        // For simplicity, assume delta changes linearly with gamma * dS
+        const dS = newSpot - SPOT;
+        let netDelta = 0;
+        positions.forEach(pos => {
+          const factor = pos.qty * LOT_SIZE;
+          const adjDelta = pos.delta + pos.gamma * dS;
+          netDelta += adjDelta * factor;
+        });
+        return netDelta;
+      });
+
+      const ctx = document.getElementById('deltaChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Net Delta',
+            data,
+            borderColor: 'rgba(25, 118, 210, 1)',
+            backgroundColor: 'rgba(25, 118, 210, 0.1)',
+            tension: 0.2,
+            pointRadius: 3,
+          }],
+        },
+        options: {
+          responsive: true,
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: 'Spot move',
+              },
+            },
+            y: {
+              title: {
+                display: true,
+                text: 'Net Delta',
+              },
+            },
+          },
+        },
+      });
+    }
+
+    function renderPnlVsSpotChart() {
+      const spotMoves = [-0.03, -0.02, -0.01, 0, 0.01, 0.02, 0.03];
+      const labels = spotMoves.map(m => `${m >= 0 ? '+' : ''}${(m * 100).toFixed(0)}%`);
+      const data = spotMoves.map(m => estimatePnL_SpotShock(positions, m));
+
+      const ctx = document.getElementById('pnlChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Est. P&L',
+            data,
+            borderColor: 'rgba(46, 125, 50, 1)',
+            backgroundColor: 'rgba(46, 125, 50, 0.1)',
+            tension: 0.2,
+            pointRadius: 3,
+          }],
+        },
+        options: {
+          responsive: true,
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: 'Spot move',
+              },
+            },
+            y: {
+              title: {
+                display: true,
+                text: 'P&L',
+              },
+            },
+          },
+        },
+      });
+    }
+
+    // Initialize
+    renderPositionsTable(positions);
+    renderNetGreeks();
+    renderSpotShockTable();
+    renderIvShockTable();
+    renderDeltaVsSpotChart();
+    renderPnlVsSpotChart();
+  </script>
 
   <script src="/static/js/nav.js"></script>
   <script>

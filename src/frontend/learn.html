@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>MyQuantDesk – Options Lab</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="/static/css/main.css" />
+  <style>
+    .article-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      margin-top: 16px;
+    }
+    @media (min-width: 900px) {
+      .article-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    .article-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+    .article-card h3 {
+      margin-top: 0;
+      font-size: 1.15rem;
+    }
+    .article-card p {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+    .article-card a {
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div id="topNav"></div>
+  <div id="optionsTabs"></div>
+
+  <h1>Options Lab</h1>
+  <p>
+    Short, practical articles to help you understand options and Greeks in the context of NIFTY trading.
+  </p>
+
+  <div class="article-grid">
+    <div class="article-card">
+      <h3>Delta</h3>
+      <p>
+        What delta really means for your P&L, how to interpret 0.30 delta, and why it changes with spot and time.
+      </p>
+      <a href="/options/learn/delta">Read article →</a>
+    </div>
+
+    <div class="article-card">
+      <h3>Gamma</h3>
+      <p>
+        Why gamma matters near expiry, how it amplifies delta, and what “gamma risk” looks like in NIFTY.
+      </p>
+      <a href="/options/learn/gamma">Read article →</a>
+    </div>
+
+    <div class="article-card">
+      <h3>Theta</h3>
+      <p>
+        Time decay in plain language: who benefits, who suffers, and how to use theta intentionally.
+      </p>
+      <a href="/options/learn/theta">Read article →</a>
+    </div>
+
+    <div class="article-card">
+      <h3>Vega</h3>
+      <p>
+        How IV moves affect your positions, when vega helps or hurts, and typical IV behavior around events.
+      </p>
+      <a href="/options/learn/vega">Read article →</a>
+    </div>
+
+    <div class="article-card">
+      <h3>IV & OI Basics</h3>
+      <p>
+        Implied volatility and open interest explained with NIFTY examples, and how to read the option chain.
+      </p>
+      <a href="/options/learn/iv-oi">Read article →</a>
+    </div>
+  </div>
+
+  <script src="/static/js/nav.js"></script>
+  <script>
+    renderTopNav();
+    renderOptionsTabs('learn');
+  </script>
+</body>
+</html>

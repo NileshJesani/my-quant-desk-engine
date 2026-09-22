@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>MyQuantDesk – IV & OI Basics</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="/static/css/main.css" />
+  <style>
+    .content { max-width: 800px; margin: 0 auto; }
+    .content h2 { font-size: 1.25rem; margin-top: 24px; }
+    .content p { line-height: 1.6; }
+    .example-box {
+      background: #f0f7ff;
+      border-left: 4px solid var(--ce);
+      padding: 12px 16px;
+      margin: 16px 0;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div id="topNav"></div>
+  <div id="optionsTabs"></div>
+
+  <div class="content">
+    <h1>IV & OI Basics</h1>
+    <p>
+      Implied volatility (IV) and open interest (OI) are two of the most useful numbers in the option chain.
+      Together, they tell you what the market expects and where traders are positioned.
+    </p>
+
+    <h2>Implied Volatility (IV)</h2>
+    <p>
+      IV is the market’s forecast of how much the underlying (NIFTY) might move, expressed as an annualized percentage.
+      Higher IV → higher option premiums; lower IV → cheaper options.
+    </p>
+    <div class="example-box">
+      If NIFTY 23450 CE has IV = 18%, the market is pricing in roughly 18% annualized volatility.
+      <br/>
+      For shorter periods, you can roughly scale: daily move ≈ 18% / √252.
+    </div>
+
+    <h2>Open Interest (OI)</h2>
+    <p>
+      OI is the total number of outstanding (open) contracts for a particular strike and expiry.
+      It shows where traders have built positions.
+    </p>
+    <ul>
+      <li>High CE OI at a strike → often acts as resistance (writers expect NIFTY to stay below).</li>
+      <li>High PE OI at a strike → often acts as support (writers expect NIFTY to stay above).</li>
+    </ul>
+
+    <h2>Reading the option chain</h2>
+    <p>
+      In the <a href="/options/options-chain">Option Chain</a> tool, you can see:
+    </p>
+    <ul>
+      <li>IV by strike – to spot skew (e.g., OTM puts with much higher IV = fear of downside).</li>
+      <li>OI by strike – to identify major support/resistance levels.</li>
+      <li>PCR (total PE OI / total CE OI) – as a rough sentiment gauge.</li>
+    </ul>
+
+    <h2>Putting it together</h2>
+    <ul>
+      <li>High IV + high OI at a strike → strong conviction by option writers, but expensive premiums.</li>
+      <li>Rising OI with rising price → long buildup (bullish).</li>
+      <li>Rising OI with falling price → short buildup (bearish).</li>
+    </ul>
+
+    <p style="margin-top:24px;">
+      Practice reading these in the <a href="/options/options-chain">Option Chain</a> and then see how they affect strategy payoffs in the <a href="/options/options-playbook">Playbook</a>.
+    </p>
+  </div>
+
+  <script src="/static/js/nav.js"></script>
+  <script>
+    renderTopNav();
+    renderOptionsTabs('learn');
+  </script>
+</body>
+</html>

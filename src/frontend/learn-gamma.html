@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>MyQuantDesk – Gamma</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="/static/css/main.css" />
+  <style>
+    .content { max-width: 800px; margin: 0 auto; }
+    .content h2 { font-size: 1.25rem; margin-top: 24px; }
+    .content p { line-height: 1.6; }
+    .example-box {
+      background: #f0f7ff;
+      border-left: 4px solid var(--ce);
+      padding: 12px 16px;
+      margin: 16px 0;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div id="topNav"></div>
+  <div id="optionsTabs"></div>
+
+  <div class="content">
+    <h1>Gamma</h1>
+    <p>
+      Gamma measures how fast delta changes when the underlying (NIFTY) moves.
+      If delta is your “speed”, gamma is your “acceleration”.
+    </p>
+
+    <h2>Why gamma matters</h2>
+    <p>
+      High gamma means delta can change quickly, which amplifies both gains and losses.
+      This is especially important:
+    </p>
+    <ul>
+      <li>Near expiry (last 1–2 weeks).</li>
+      <li>For ATM and near-ATM strikes.</li>
+      <li>During large intraday moves in NIFTY.</li>
+    </ul>
+
+    <h2>Simple example</h2>
+    <div class="example-box">
+      Suppose a NIFTY 23000 CE has:
+      <ul>
+        <li>Delta = 0.50</li>
+        <li>Gamma = 0.0002</li>
+      </ul>
+      If NIFTY moves up by 100 points, delta might increase by roughly:
+      <br/>
+      0.0002 × 100 = 0.02 → new delta ≈ 0.52.
+    </div>
+    <p>
+      For larger moves or higher gamma, this effect becomes very noticeable in your P&L.
+    </p>
+
+    <h2>Gamma risk</h2>
+    <p>
+      “Gamma risk” usually refers to:
+    </p>
+    <ul>
+      <li>Short options near expiry: small moves in NIFTY cause large delta swings.</li>
+      <li>Difficulty in hedging: your hedge ratio (delta) keeps changing.</li>
+    </ul>
+    <p>
+      Many traders avoid selling ATM options in the last few days unless they actively monitor and adjust.
+    </p>
+
+    <h2>Using gamma consciously</h2>
+    <ul>
+      <li>Long gamma (e.g., long straddle): benefits from big moves, suffers from time decay.</li>
+      <li>Short gamma (e.g., short straddle): benefits from time decay, suffers from big moves.</li>
+    </ul>
+
+    <p style="margin-top:24px;">
+      <strong>Next:</strong> Understand how time decay (theta) interacts with gamma in the <a href="/options/learn/theta">Theta</a> article.
+    </p>
+  </div>
+
+  <script src="/static/js/nav.js"></script>
+  <script>
+    renderTopNav();
+    renderOptionsTabs('learn');
+  </script>
+</body>
+</html>

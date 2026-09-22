@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>MyQuantDesk – Theta</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="/static/css/main.css" />
+  <style>
+    .content { max-width: 800px; margin: 0 auto; }
+    .content h2 { font-size: 1.25rem; margin-top: 24px; }
+    .content p { line-height: 1.6; }
+    .example-box {
+      background: #f0f7ff;
+      border-left: 4px solid var(--ce);
+      padding: 12px 16px;
+      margin: 16px 0;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div id="topNav"></div>
+  <div id="optionsTabs"></div>
+
+  <div class="content">
+    <h1>Theta (Time Decay)</h1>
+    <p>
+      Theta measures how much an option’s price tends to fall each day due to time passing,
+      assuming spot and IV stay constant. It’s the “rent” you pay (or collect) for holding options.
+    </p>
+
+    <h2>Who benefits from theta?</h2>
+    <ul>
+      <li><strong>Option sellers:</strong> Collect theta; option premiums erode over time.</li>
+      <li><strong>Option buyers:</strong> Pay theta; need directional or IV moves to offset decay.</li>
+    </ul>
+
+    <h2>Simple example</h2>
+    <div class="example-box">
+      A NIFTY 23200 PE is trading at ₹120 with theta = −8.5 per day (per unit).
+      <br/>
+      All else equal, after 1 day, the option might be worth roughly ₹111.5.
+      <br/>
+      For 1 lot (25 units), that’s about ₹212.5 of time decay.
+    </div>
+
+    <h2>How theta behaves</h2>
+    <ul>
+      <li>Theta accelerates as expiry approaches, especially in the last 7–10 days.</li>
+      <li>ATM options usually have the highest absolute theta.</li>
+      <li>Far OTM/ITM options have lower theta (less time value to decay).</li>
+    </ul>
+
+    <h2>Using theta intentionally</h2>
+    <p>
+      Common approaches:
+    </p>
+    <ul>
+      <li>Selling options (or spreads) to collect theta when you expect low movement.</li>
+      <li>Buying options only when you expect a move large/faster enough to beat theta.</li>
+      <li>Avoiding long OTM options very close to expiry unless you’re speculating on a big spike.</li>
+    </ul>
+
+    <p style="margin-top:24px;">
+      <strong>Next:</strong> See how IV moves (vega) can overpower theta around events in the <a href="/options/learn/vega">Vega</a> article.
+    </p>
+  </div>
+
+  <script src="/static/js/nav.js"></script>
+  <script>
+    renderTopNav();
+    renderOptionsTabs('learn');
+  </script>
+</body>
+</html>
