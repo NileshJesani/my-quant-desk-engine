@@ -4,9 +4,21 @@
   <meta charset="UTF-8" />
   <title>MyQuantDesk – NIFTY Options</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
   <style>
     body { font-family: Arial, sans-serif; margin: 20px; }
     h1 { font-size: 1.4rem; }
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 12px;
+    }
+    .logo {
+      width: 48px;
+      height: 48px;
+      object-fit: contain;
+    }
     .controls {
       margin: 10px 0 20px;
       display: flex;
@@ -25,11 +37,12 @@
       padding: 4px 6px;
       font-size: 0.9rem;
     }
-    table { border-collapse: collapse; width: 100%; font-size: 0.85rem; }
+    table { border-collapse: collapse; width: 100%; font-size: 0.85rem; margin-top: 20px; }
     th, td { border: 1px solid #ccc; padding: 4px 6px; text-align: right; }
     th { background: #f5f5f5; text-align: center; }
     td.symbol { text-align: left; }
-    #spot { font-weight: bold; margin-bottom: 8px; }
+    #spot { font-weight: bold; margin-bottom: 4px; }
+    #fetchTime { font-size: 0.85rem; color: #555; margin-bottom: 8px; }
     .loading { color: #666; font-style: italic; }
     .atm {
       background: #fff3cd;
@@ -43,6 +56,27 @@
       text-decoration: none;
       margin-right: 12px;
     }
+    .charts {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+      margin-top: 24px;
+    }
+    .chart-box {
+      background: #fff;
+      padding: 16px;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    .chart-box h3 {
+      margin-top: 0;
+      font-size: 1.1rem;
+    }
+    @media (min-width: 900px) {
+      .charts {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
   </style>
 </head>
 <body>
@@ -51,8 +85,13 @@
     <a href="/options">NIFTY Options</a>
   </div>
 
-  <h1>MyQuantDesk – NIFTY Options Greeks</h1>
+  <div class="header">
+    <img src="/static/images/logo.png" alt="MyQuantDesk Logo" class="logo" />
+    <h1>MyQuantDesk – NIFTY Options Greeks</h1>
+  </div>
+
   <div id="spot">Spot LTP: <span class="loading">Loading...</span></div>
+  <div id="fetchTime">Data fetched at: <span class="loading">--</span></div>
 
   <div class="controls">
     <label>
@@ -99,9 +138,22 @@
     </tbody>
   </table>
 
+  <div class="charts">
+    <div class="chart-box">
+      <h3>IV vs Strike</h3>
+      <canvas id="ivChart"></canvas>
+    </div>
+    <div class="chart-box">
+      <h3>OI vs Strike</h3>
+      <canvas id="oiChart"></canvas>
+    </div>
+  </div>
+
   <script>
     let latestData = null;
     let atmStrike = null;
+    let ivChartInstance = null;
+    let oiChartInstance = null;
 
     function computeAtmStrike(spot, options) {
       if (!spot) return null;
@@ -112,12 +164,141 @@
       );
     }
 
+    function formatFetchTime(timestampSec) {
+      const date = new Date(timestampSec * 1000);
+      const pad = n => String(n).padStart(2, '0');
+      const dd = pad(date.getDate());
+      const mm = date.toLocaleString('en-IN', { month: 'short' });
+      const yyyy = date.getFullYear();
+      const hh = pad(date.getHours());
+      const mi = pad(date.getMinutes());
+      return `${dd} ${mm} ${yyyy} ${hh}:${mi}`;
+    }
+
+    function prepareChartData(options, typeFilter) {
+      let filtered = options.slice();
+      if (typeFilter !== 'ALL') {
+        filtered = filtered.filter(o => o.option_type === typeFilter);
+      }
+
+      // Group by strike and option type
+      const byStrike = {};
+      filtered.forEach(o => {
+        if (!byStrike[o.strike_price]) {
+          byStrike[o.strike_price] = { CE: null, PE: null };
+        }
+        byStrike[o.strike_price][o.option_type] = o;
+      });
+
+      const strikes = Object.keys(byStrike).map(Number).sort((a, b) => a - b);
+      const ceIV = strikes.map(s => (byStrike[s].CE?.iv ?? null));
+      const peIV = strikes.map(s => (byStrike[s].PE?.iv ?? null));
+      const ceOI = strikes.map(s => (byStrike[s].CE?.oi ?? null));
+      const peOI = strikes.map(s => (byStrike[s].PE?.oi ?? null));
+
+      return { strikes, ceIV, peIV, ceOI, peOI };
+    }
+
+    function renderCharts(data, typeFilter) {
+      const chartData = prepareChartData(data.options, typeFilter);
+
+      const commonOptions = {
+        responsive: true,
+        interaction: {
+          mode: 'index',
+          intersect: false,
+        },
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: 'Strike',
+            },
+          },
+        },
+      };
+
+      // IV chart
+      const ivCtx = document.getElementById('ivChart').getContext('2d');
+      const ivData = {
+        labels: chartData.strikes,
+        datasets: [
+          {
+            label: 'CE IV',
+            data: chartData.ceIV,
+            borderColor: 'rgba(75, 192, 192, 1)',
+            backgroundColor: 'rgba(75, 192, 192, 0.1)',
+            tension: 0.2,
+            pointRadius: 2,
+          },
+          {
+            label: 'PE IV',
+            data: chartData.peIV,
+            borderColor: 'rgba(255, 99, 132, 1)',
+            backgroundColor: 'rgba(255, 99, 132, 0.1)',
+            tension: 0.2,
+            pointRadius: 2,
+          },
+        ],
+      };
+
+      if (ivChartInstance) {
+        ivChartInstance.data = ivData;
+        ivChartInstance.update();
+      } else {
+        ivChartInstance = new Chart(ivCtx, {
+          type: 'line',
+          data: ivData,
+          options: commonOptions,
+        });
+      }
+
+      // OI chart
+      const oiCtx = document.getElementById('oiChart').getContext('2d');
+      const oiData = {
+        labels: chartData.strikes,
+        datasets: [
+          {
+            label: 'CE OI',
+            data: chartData.ceOI,
+            borderColor: 'rgba(54, 162, 235, 1)',
+            backgroundColor: 'rgba(54, 162, 235, 0.1)',
+            tension: 0.2,
+            pointRadius: 2,
+          },
+          {
+            label: 'PE OI',
+            data: chartData.peOI,
+            borderColor: 'rgba(255, 159, 64, 1)',
+            backgroundColor: 'rgba(255, 159, 64, 0.1)',
+            tension: 0.2,
+            pointRadius: 2,
+          },
+        ],
+      };
+
+      if (oiChartInstance) {
+        oiChartInstance.data = oiData;
+        oiChartInstance.update();
+      } else {
+        oiChartInstance = new Chart(oiCtx, {
+          type: 'line',
+          data: oiData,
+          options: commonOptions,
+        });
+      }
+    }
+
     function render() {
       if (!latestData) return;
 
       const spot = latestData.spot_ltp;
       document.getElementById('spot').textContent =
         'Spot LTP: ' + (spot ?? 'N/A');
+
+      const timestamp = latestData.timestamp;
+      document.getElementById('fetchTime').textContent =
+        'Data fetched at: ' + formatFetchTime(timestamp);
 
       const typeFilter = document.getElementById('typeFilter').value;
       const minStrike = document.getElementById('minStrike').value;
@@ -167,6 +348,9 @@
         `;
         tbody.appendChild(tr);
       });
+
+      // Render charts using full (unfiltered) data but respecting type filter
+      renderCharts(latestData, typeFilter);
     }
 
     async function loadSnapshot() {
@@ -178,6 +362,7 @@
         render();
       } catch (err) {
         document.getElementById('spot').textContent = 'Error loading data';
+        document.getElementById('fetchTime').textContent = 'Data fetched at: --';
         console.error(err);
       }
     }
