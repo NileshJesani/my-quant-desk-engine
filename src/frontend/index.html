@@ -2,147 +2,188 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>MyQuantDesk – Quantitative Research & Trading Tools</title>
+  <title>MyQuantDesk – Quant Research & Tools for Indian Markets</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="/static/css/main.css" />
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background: #f7f7f7;
-      color: #222;
-      line-height: 1.5;
-    }
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 40px 20px;
-    }
-    .header {
-      display: flex;
-      align-items: center;
-      gap: 16px;
+    .hero {
+      background: linear-gradient(135deg, #eef4fb 0%, #f5f5f5 100%);
+      padding: 32px 20px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
       margin-bottom: 24px;
     }
-    .logo {
-      width: 64px;
-      height: 64px;
-      object-fit: contain;
-    }
-    h1 {
-      font-size: 2rem;
-      margin: 0;
-    }
-    .subtitle {
-      font-size: 1.1rem;
-      color: #555;
-      margin-top: 4px;
-    }
-    .section {
-      background: #fff;
-      padding: 24px 28px;
-      border-radius: 8px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-      margin-bottom: 24px;
-    }
-    .section h2 {
-      font-size: 1.4rem;
+    .hero h1 {
       margin-top: 0;
-      margin-bottom: 0.75rem;
+      font-size: 1.8rem;
     }
-    .cta {
-      display: inline-block;
-      background: #1976d2;
-      color: #fff;
-      padding: 10px 18px;
-      border-radius: 6px;
-      text-decoration: none;
+    .hero p {
+      font-size: 1.05rem;
+      color: var(--muted);
+      max-width: 700px;
+    }
+
+    .section-title {
+      font-size: 1.3rem;
+      margin: 28px 0 12px;
+      font-weight: bold;
+    }
+
+    .tools-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      margin-top: 16px;
+    }
+    @media (min-width: 900px) {
+      .tools-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .tool-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+    .tool-card h3 {
+      margin-top: 0;
+      font-size: 1.15rem;
+    }
+    .tool-card p {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-bottom: 12px;
+    }
+    .tool-card a {
       font-weight: 600;
-      margin-top: 8px;
     }
-    .disclaimer {
-      font-size: 0.85rem;
-      color: #555;
+
+    .contact-box {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+      margin-top: 16px;
+    }
+
+    .founder-box {
+      margin-top: 24px;
+      font-size: 0.95rem;
+      color: var(--muted);
+    }
+
+    .disclaimer-box {
+      margin-top: 24px;
+      padding: 14px 16px;
       background: #fff8e1;
-      padding: 16px 18px;
-      border-radius: 6px;
-      border: 1px solid #ffe082;
-    }
-    footer {
-      text-align: center;
+      border-left: 4px solid #ffb300;
+      border-radius: 4px;
       font-size: 0.85rem;
-      color: #777;
-      margin-top: 40px;
-      margin-bottom: 40px;
+      line-height: 1.5;
+      color: #555;
+    }
+
+    footer {
+      margin-top: 32px;
+      padding-top: 16px;
+      border-top: 1px solid #ddd;
+      font-size: 0.85rem;
+      color: var(--muted);
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <img src="/static/images/logo.png" alt="MyQuantDesk Logo" class="logo" />
-      <div>
-        <h1>MyQuantDesk</h1>
-        <div class="subtitle">
-          Quantitative research and real-time tools for financial markets
-        </div>
-      </div>
-    </div>
 
-    <div class="section">
-      <h2>What we do</h2>
-      <p>
-        MyQuantDesk is a research-focused platform that provides fundamental and
-        technical research on financial markets, sectors, and individual companies.
-        We build quantitative models and real-time tools that help traders and
-        investors measure risk and make more informed decisions.
-      </p>
-      <p>
-        Our tools work on live market data and are designed for:
-      </p>
-      <ul>
-        <li>Options traders who need Greeks and risk metrics in real time.</li>
-        <li>Investors looking for data-driven views on sectors and stocks.</li>
-        <li>Quant enthusiasts building and testing systematic strategies.</li>
-      </ul>
-      <a class="cta" href="/options">Open NIFTY Options Tool</a>
-    </div>
-
-    <div class="section">
-      <h2>Research & tools</h2>
-      <p>
-        We combine quantitative research with practical software:
-      </p>
-      <ul>
-        <li>Fundamental and technical research reports.</li>
-        <li>Real-time options analytics (Greeks, IV, OI, volume).</li>
-        <li>Risk measurement and scenario analysis for positions.</li>
-      </ul>
-      <p>
-        All tools are built to be transparent, data-driven, and focused on risk control.
-      </p>
-    </div>
-
-    <div class="section disclaimer">
-      <h2>SEBI Research Analyst Disclaimer</h2>
-      <p>
-        MyQuantDesk is intended to be a research and analytics platform. The content,
-        models, and tools provided here are for educational and informational purposes
-        only and do not constitute investment advice, recommendations, or an offer to
-        buy or sell any security.
-      </p>
-      <p>
-        Investments in securities are subject to market risks. Please read all
-        related documents carefully before investing. Past performance is not
-        indicative of future results. Users are advised to consult a SEBI-registered
-        investment adviser before making any investment decisions.
-      </p>
-    </div>
-
-    <footer>
-      © <span id="year"></span> MyQuantDesk. All rights reserved.
-    </footer>
+  <!-- Hero -->
+  <div class="hero">
+    <h1>MyQuantDesk</h1>
+    <p>
+      Quantitative research and practical tools for Indian derivatives traders.
+      Built to combine professional-grade analytics with clear, actionable insights.
+    </p>
   </div>
+
+  <!-- What we do -->
+  <h2 class="section-title">What we do</h2>
+  <div class="card">
+    <p>
+      MyQuantDesk focuses on research-driven tools for NIFTY options and other Indian derivatives.
+      We blend quantitative models with trader-friendly interfaces to help you:
+    </p>
+    <ul>
+      <li>Understand market positioning through option chain analytics.</li>
+      <li>Evaluate strategies using Greeks and scenario analysis.</li>
+      <li>Learn core concepts with concise, India-specific explanations.</li>
+    </ul>
+  </div>
+
+  <!-- Research & tools -->
+  <h2 class="section-title">Research & tools</h2>
+  <div class="tools-grid">
+    <div class="tool-card">
+      <h3>NIFTY Options</h3>
+      <p>
+        Live option chain with Greeks, OI, IV, PCR, and key levels. Strategy playbook and Greek risk meter included.
+      </p>
+      <a href="/options">Explore NIFTY Options →</a>
+    </div>
+
+    <div class="tool-card">
+      <h3>Options Lab</h3>
+      <p>
+        Short articles on delta, gamma, theta, vega, and IV/OI, explained with NIFTY examples.
+      </p>
+      <a href="/options/learn">Open Options Lab →</a>
+    </div>
+
+    <div class="tool-card">
+      <h3>Coming soon</h3>
+      <p>
+        Additional research tools, backtesting frameworks, and advanced analytics for Indian derivatives.
+      </p>
+      <span style="color:var(--muted);font-size:0.95rem;">Stay tuned.</span>
+    </div>
+  </div>
+
+  <!-- Business enquiries / Contact -->
+  <h2 class="section-title">Business enquiries / Contact Us</h2>
+  <div class="contact-box">
+    <p>
+      For collaborations, data licensing, or feedback, reach out at:
+      <br />
+      <strong>contact@myquantdesk.in</strong>
+    </p>
+    <p style="color:var(--muted);font-size:0.9rem;">
+      A dedicated contact page with a form will be added shortly.
+    </p>
+  </div>
+
+  <!-- Founder attribution -->
+  <div class="founder-box">
+    <strong>Nilesh Jesani</strong>, Founder & Owner
+  </div>
+
+  <!-- SEBI Research Analyst Disclaimer -->
+  <div class="disclaimer-box">
+    <strong>SEBI Research Analyst Disclaimer:</strong>
+    <p style="margin-top:6px;">
+      The content and tools on this website are for educational and informational purposes only.
+      They are not intended as investment advice, recommendations, or offers to buy or sell securities.
+      MyQuantDesk is not a SEBI-registered research analyst or investment adviser. Any decisions made based
+      on this information are solely at your own risk. Please consult a qualified financial adviser before
+      making any investment decisions.
+    </p>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    © <span id="year"></span> MyQuantDesk. All rights reserved.
+    <span style="margin-left:12px;">
+      <a href="mailto:contact@myquantdesk.in">Contact</a>
+    </span>
+  </footer>
 
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();
