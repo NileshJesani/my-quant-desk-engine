@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
+    body { font-family: Arial, sans-serif; margin: 20px; background: #fafafa; }
     h1 { font-size: 1.4rem; }
     .header {
       display: flex;
@@ -28,6 +28,37 @@
       text-decoration: none;
       margin-right: 12px;
     }
+
+    /* Summary stats bar */
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+      margin: 16px 0 24px;
+    }
+    .stat-card {
+      background: #fff;
+      padding: 14px 16px;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      font-size: 0.95rem;
+    }
+    .stat-card .label {
+      color: #555;
+      font-size: 0.85rem;
+      margin-bottom: 6px;
+    }
+    .stat-card .value {
+      font-weight: bold;
+      font-size: 1.05rem;
+    }
+
+    .section-title {
+      font-size: 1.1rem;
+      margin: 24px 0 12px;
+      font-weight: bold;
+    }
+
     .controls {
       margin: 10px 0 20px;
       display: flex;
@@ -46,9 +77,10 @@
       padding: 4px 6px;
       font-size: 0.9rem;
     }
-    table { border-collapse: collapse; width: 100%; font-size: 0.85rem; margin-top: 20px; }
-    th, td { border: 1px solid #ccc; padding: 4px 6px; text-align: right; }
-    th { background: #f5f5f5; text-align: center; }
+
+    table { border-collapse: collapse; width: 100%; font-size: 0.85rem; margin-top: 20px; background: #fff; }
+    th, td { border: 1px solid #ddd; padding: 6px 8px; text-align: right; }
+    th { background: #f5f5f5; text-align: center; font-weight: 600; }
     td.symbol { text-align: left; }
     #spot { font-weight: bold; margin-bottom: 4px; }
     #fetchTime { font-size: 0.85rem; color: #555; margin-bottom: 8px; }
@@ -56,6 +88,7 @@
     .atm {
       background: #fff3cd;
     }
+
     .charts {
       display: grid;
       grid-template-columns: 1fr;
@@ -72,8 +105,49 @@
       margin-top: 0;
       font-size: 1.1rem;
     }
+
+    /* Key levels */
+    .key-levels {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      margin-top: 24px;
+    }
+    .level-card {
+      background: #fff;
+      padding: 16px;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    .level-card h3 {
+      margin-top: 0;
+      font-size: 1.1rem;
+    }
+    .level-table {
+      width: 100%;
+      font-size: 0.9rem;
+      margin-top: 8px;
+    }
+    .level-table th, .level-table td {
+      border: 1px solid #ddd;
+      padding: 6px 8px;
+      text-align: right;
+    }
+    .level-table th {
+      background: #f5f5f5;
+      text-align: center;
+      font-weight: 600;
+    }
+    .level-table td.strike-cell {
+      text-align: left;
+      font-weight: 600;
+    }
+
     @media (min-width: 900px) {
       .charts {
+        grid-template-columns: 1fr 1fr;
+      }
+      .key-levels {
         grid-template-columns: 1fr 1fr;
       }
     }
@@ -89,6 +163,34 @@
   <div class="header">
     <img src="/static/images/logo.png" alt="MyQuantDesk Logo" class="logo" />
     <h1>MyQuantDesk – Option Chain</h1>
+  </div>
+
+  <!-- Summary stats -->
+  <div class="stats-bar" id="statsBar">
+    <div class="stat-card">
+      <div class="label">Spot LTP</div>
+      <div class="value" id="statSpot">Loading...</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">PCR (OI)</div>
+      <div class="value" id="statPcr">--</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Total CE OI</div>
+      <div class="value" id="statCeOi">--</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Total PE OI</div>
+      <div class="value" id="statPeOi">--</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Max CE OI Strike</div>
+      <div class="value" id="statMaxCeStrike">--</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Max PE OI Strike</div>
+      <div class="value" id="statMaxPeStrike">--</div>
+    </div>
   </div>
 
   <div id="spot">Spot LTP: <span class="loading">Loading...</span></div>
@@ -127,6 +229,8 @@
         <th>Strike</th>
         <th>Type</th>
         <th>LTP</th>
+        <th>OI</th>
+        <th>Volume</th>
         <th>IV</th>
         <th>Delta</th>
         <th>Gamma</th>
@@ -135,9 +239,43 @@
       </tr>
     </thead>
     <tbody>
-      <tr><td colspan="9" class="loading">Loading...</td></tr>
+      <tr><td colspan="11" class="loading">Loading...</td></tr>
     </tbody>
   </table>
+
+  <div class="section-title">Key Levels (Major OI Weightage)</div>
+  <div class="key-levels">
+    <div class="level-card">
+      <h3>Top 5 Resistance Strikes (CE OI)</h3>
+      <table class="level-table" id="ceOiTable">
+        <thead>
+          <tr>
+            <th>Strike</th>
+            <th>CE OI</th>
+            <th>CE LTP</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td colspan="3" class="loading">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="level-card">
+      <h3>Top 5 Support Strikes (PE OI)</h3>
+      <table class="level-table" id="peOiTable">
+        <thead>
+          <tr>
+            <th>Strike</th>
+            <th>PE OI</th>
+            <th>PE LTP</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td colspan="3" class="loading">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 
   <div class="charts">
     <div class="chart-box">
@@ -155,6 +293,31 @@
     let atmStrike = null;
     let ivChartInstance = null;
     let oiChartInstance = null;
+
+    // Format symbol: NIFTY2692223450CE -> "NIFTY 22 SEP 26 23450 CE"
+    function formatSymbol(symbol) {
+      // Expect pattern: UNDERLYING + DDMMYY + STRIKE + CE/PE
+      // Example: NIFTY2692223450CE
+      const match = symbol.match(/^([A-Z]+)(\d{5})(\d+)(CE|PE)$/);
+      if (!match) return symbol;
+      const underlying = match[1];
+      const expiryCode = match[2]; // DDMMYY
+      const strike = match[3];
+      const type = match[4];
+
+      const dd = expiryCode.slice(0, 2);
+      const mmNum = parseInt(expiryCode.slice(2, 4), 10);
+      const yy = expiryCode.slice(4, 6);
+
+      const months = [
+        "JAN","FEB","MAR","APR","MAY","JUN",
+        "JUL","AUG","SEP","OCT","NOV","DEC"
+      ];
+      const mm = months[mmNum - 1] || expiryCode.slice(2, 4);
+      const yyyy = "20" + yy;
+
+      return `${underlying} ${dd} ${mm} ${yyyy} ${strike} ${type}`;
+    }
 
     function computeAtmStrike(spot, options) {
       if (!spot) return null;
@@ -288,12 +451,137 @@
       }
     }
 
+    function computeStats(options) {
+      const totalCeOi = options
+        .filter(o => o.option_type === 'CE')
+        .reduce((sum, o) => sum + (o.oi || 0), 0);
+
+      const totalPeOi = options
+        .filter(o => o.option_type === 'PE')
+        .reduce((sum, o) => sum + (o.oi || 0), 0);
+
+      const pcr = totalCeOi > 0 ? (totalPeOi / totalCeOi) : null;
+
+      // Max CE OI strike
+      const ceByStrike = {};
+      options.filter(o => o.option_type === 'CE').forEach(o => {
+        if (!ceByStrike[o.strike_price]) ceByStrike[o.strike_price] = 0;
+        ceByStrike[o.strike_price] += (o.oi || 0);
+      });
+      let maxCeStrike = null;
+      let maxCeOi = -1;
+      Object.entries(ceByStrike).forEach(([strike, oi]) => {
+        if (oi > maxCeOi) {
+          maxCeOi = oi;
+          maxCeStrike = Number(strike);
+        }
+      });
+
+      // Max PE OI strike
+      const peByStrike = {};
+      options.filter(o => o.option_type === 'PE').forEach(o => {
+        if (!peByStrike[o.strike_price]) peByStrike[o.strike_price] = 0;
+        peByStrike[o.strike_price] += (o.oi || 0);
+      });
+      let maxPeStrike = null;
+      let maxPeOi = -1;
+      Object.entries(peByStrike).forEach(([strike, oi]) => {
+        if (oi > maxPeOi) {
+          maxPeOi = oi;
+          maxPeStrike = Number(strike);
+        }
+      });
+
+      // Top 5 CE OI strikes
+      const topCe = Object.entries(ceByStrike)
+        .map(([strike, oi]) => ({
+          strike: Number(strike),
+          oi,
+          ltp: options.find(o => o.strike_price == strike && o.option_type === 'CE')?.ltp ?? null,
+        }))
+        .sort((a, b) => b.oi - a.oi)
+        .slice(0, 5);
+
+      // Top 5 PE OI strikes
+      const topPe = Object.entries(peByStrike)
+        .map(([strike, oi]) => ({
+          strike: Number(strike),
+          oi,
+          ltp: options.find(o => o.strike_price == strike && o.option_type === 'PE')?.ltp ?? null,
+        }))
+        .sort((a, b) => b.oi - a.oi)
+        .slice(0, 5);
+
+      return {
+        totalCeOi,
+        totalPeOi,
+        pcr,
+        maxCeStrike,
+        maxPeStrike,
+        topCe,
+        topPe,
+      };
+    }
+
+    function renderStats(options) {
+      const stats = computeStats(options);
+
+      document.getElementById('statCeOi').textContent =
+        stats.totalCeOi.toLocaleString('en-IN');
+      document.getElementById('statPeOi').textContent =
+        stats.totalPeOi.toLocaleString('en-IN');
+
+      document.getElementById('statPcr').textContent =
+        stats.pcr ? stats.pcr.toFixed(2) : '--';
+
+      document.getElementById('statMaxCeStrike').textContent =
+        stats.maxCeStrike ? stats.maxCeStrike : '--';
+      document.getElementById('statMaxPeStrike').textContent =
+        stats.maxPeStrike ? stats.maxPeStrike : '--';
+
+      // Top CE table
+      const ceTbody = document.querySelector('#ceOiTable tbody');
+      ceTbody.innerHTML = '';
+      if (stats.topCe.length === 0) {
+        ceTbody.innerHTML = '<tr><td colspan="3" class="loading">No data</td></tr>';
+      } else {
+        stats.topCe.forEach(row => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td class="strike-cell">${row.strike}</td>
+            <td>${row.oi.toLocaleString('en-IN')}</td>
+            <td>${row.ltp ?? '--'}</td>
+          `;
+          ceTbody.appendChild(tr);
+        });
+      }
+
+      // Top PE table
+      const peTbody = document.querySelector('#peOiTable tbody');
+      peTbody.innerHTML = '';
+      if (stats.topPe.length === 0) {
+        peTbody.innerHTML = '<tr><td colspan="3" class="loading">No data</td></tr>';
+      } else {
+        stats.topPe.forEach(row => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td class="strike-cell">${row.strike}</td>
+            <td>${row.oi.toLocaleString('en-IN')}</td>
+            <td>${row.ltp ?? '--'}</td>
+          `;
+          peTbody.appendChild(tr);
+        });
+      }
+    }
+
     function renderChain() {
       if (!latestData) return;
 
       const spot = latestData.spot_ltp;
       document.getElementById('spot').textContent =
         'Spot LTP: ' + (spot ?? 'N/A');
+      document.getElementById('statSpot').textContent =
+        spot ?? 'N/A';
 
       const timestamp = latestData.timestamp;
       document.getElementById('fetchTime').textContent =
@@ -305,6 +593,9 @@
       const showAtmOnly = document.getElementById('showAtmOnly').checked;
 
       atmStrike = computeAtmStrike(spot, latestData.options);
+
+      // Render stats & key levels
+      renderStats(latestData.options);
 
       const tbody = document.querySelector('#chain tbody');
       tbody.innerHTML = '';
@@ -325,7 +616,7 @@
       }
 
       if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" class="loading">No options match the filters</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="11" class="loading">No options match the filters</td></tr>';
         return;
       }
 
@@ -334,16 +625,20 @@
         const isAtm = atmStrike !== null && opt.strike_price === atmStrike;
         if (isAtm) tr.classList.add('atm');
 
+        const readableSymbol = formatSymbol(opt.symbol);
+
         tr.innerHTML = `
-          <td class="symbol">${opt.symbol}</td>
+          <td class="symbol">${readableSymbol}</td>
           <td>${opt.strike_price}</td>
           <td>${opt.option_type}</td>
           <td>${opt.ltp}</td>
-          <td>${opt.iv ?? ''}</td>
-          <td>${opt.delta ?? ''}</td>
-          <td>${opt.gamma ?? ''}</td>
-          <td>${opt.theta ?? ''}</td>
-          <td>${opt.vega ?? ''}</td>
+          <td>${opt.oi ?? '--'}</td>
+          <td>${opt.volume ?? '--'}</td>
+          <td>${opt.iv ?? '--'}</td>
+          <td>${opt.delta ?? '--'}</td>
+          <td>${opt.gamma ?? '--'}</td>
+          <td>${opt.theta ?? '--'}</td>
+          <td>${opt.vega ?? '--'}</td>
         `;
         tbody.appendChild(tr);
       });
