@@ -5,29 +5,8 @@
   <title>MyQuantDesk – Greeks-Based Playbook</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="/static/css/main.css" />
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    h1 { font-size: 1.4rem; }
-    .header {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      margin-bottom: 12px;
-    }
-    .logo {
-      width: 48px;
-      height: 48px;
-      object-fit: contain;
-    }
-    .nav {
-      margin-bottom: 16px;
-      font-size: 0.9rem;
-    }
-    .nav a {
-      color: #1976d2;
-      text-decoration: none;
-      margin-right: 12px;
-    }
     .playbook-controls {
       margin: 10px 0 16px;
       display: flex;
@@ -43,10 +22,10 @@
       font-size: 0.95rem;
     }
     .strategy-card {
-      background: #fff;
+      background: var(--card-bg);
       padding: 18px 20px;
-      border-radius: 8px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
       margin-top: 12px;
     }
     .strategy-card h3 {
@@ -67,24 +46,18 @@
     }
     .chart-container {
       margin-top: 20px;
-      background: #fff;
+      background: var(--card-bg);
       padding: 16px;
-      border-radius: 8px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
     }
   </style>
 </head>
 <body>
-  <div class="nav">
-    <a href="/">Home</a>
-    <a href="/options">NIFTY Options</a>
-    <a href="/greek-meter">Greek Risk Meter</a>
-  </div>
+  <div id="topNav"></div>
+  <div id="optionsTabs"></div>
 
-  <div class="header">
-    <img src="/static/images/logo.png" alt="MyQuantDesk Logo" class="logo" />
-    <h1>MyQuantDesk – Greeks-Based Playbook</h1>
-  </div>
+  <h1>Greeks-Based Playbook</h1>
 
   <div class="playbook-controls">
     <label for="strategySelect">Select strategy:</label>
@@ -100,7 +73,7 @@
   <div class="chart-container">
     <h3>P&L at Expiry vs Underlying</h3>
     <canvas id="playbookChart"></canvas>
-    <p id="playbookChartMsg" class="loading" style="display:none;color:#666;">Loading chart...</p>
+    <p id="playbookChartMsg" class="loading" style="display:none;color:var(--muted);">Loading chart...</p>
   </div>
 
   <script>
@@ -471,6 +444,12 @@
     });
 
     document.getElementById('strategySelect').addEventListener('change', renderPlaybook);
+  </script>
+
+  <script src="/static/js/nav.js"></script>
+  <script>
+    renderTopNav();
+    renderOptionsTabs('playbook');
   </script>
 </body>
 </html>

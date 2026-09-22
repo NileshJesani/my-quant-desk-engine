@@ -89,17 +89,8 @@ async def options_page():
         )
     return FileResponse(str(options_path))
 
-@app.get("/greek-meter")
-async def greek_meter_page():
-    meter_path = frontend_dir / "greek_meter.html"
-    if not meter_path.exists():
-        return JSONResponse(
-            status_code=500,
-            content={"error": "frontend/greek_meter.html not found"},
-        )
-    return FileResponse(str(meter_path))
 
-@app.get("/options-chain")
+@app.get("/options/options-chain")
 async def get_options_chain():
     chain_path = frontend_dir / "options-chain.html"
     if not chain_path.exists():
@@ -110,7 +101,7 @@ async def get_options_chain():
     return FileResponse(str(chain_path))
 
 
-@app.get("/options-playbook")
+@app.get("/options/options-playbook")
 async def get_options_playbook():
     playbook_path = frontend_dir / "options-playbook.html"
     if not playbook_path.exists():
@@ -119,6 +110,17 @@ async def get_options_playbook():
             content={"error": "frontend/options-playbook.html not found"},
         )
     return FileResponse(str(playbook_path))
+
+
+@app.get("/options/greek-meter")
+async def get_greek_meter():
+    meter_path = frontend_dir / "greek_meter.html"
+    if not meter_path.exists():
+        return JSONResponse(
+            status_code=500,
+            content={"error": "frontend/greek_meter.html not found"},
+        )
+    return FileResponse(str(meter_path))
 
 if __name__ == "__main__":
     import uvicorn

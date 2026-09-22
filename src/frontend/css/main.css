@@ -1,0 +1,206 @@
+:root {
+  --bg: #fafafa;
+  --card-bg: #ffffff;
+  --text: #222222;
+  --muted: #666666;
+  --ce: #1976d2;
+  --pe: #d84315;
+  --success: #2e7d32;
+  --danger: #c62828;
+  --shadow: 0 2px 6px rgba(0,0,0,0.06);
+  --shadow-hover: 0 4px 10px rgba(0,0,0,0.1);
+  --radius: 8px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  margin: 0;
+  padding: 20px;
+  line-height: 1.4;
+}
+
+h1 {
+  font-size: 1.5rem;
+  margin: 0 0 8px;
+}
+
+h2 {
+  font-size: 1.25rem;
+  margin: 24px 0 12px;
+}
+
+h3 {
+  font-size: 1.05rem;
+  margin: 16px 0 8px;
+}
+
+a {
+  color: var(--ce);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Top navigation */
+.top-nav {
+  margin-bottom: 16px;
+  font-size: 0.95rem;
+}
+
+.top-nav a {
+  color: var(--ce);
+  text-decoration: none;
+  margin-right: 14px;
+  padding: 6px 10px;
+  border-radius: 6px;
+}
+
+.top-nav a:hover {
+  background: #eef4fb;
+  text-decoration: none;
+}
+
+/* Options sub-nav (tabs) */
+.options-tabs {
+  display: flex;
+  gap: 8px;
+  margin: 12px 0 20px;
+  border-bottom: 1px solid #ddd;
+  flex-wrap: wrap;
+}
+
+.options-tabs a {
+  padding: 8px 14px;
+  border: 1px solid transparent;
+  border-bottom: none;
+  border-radius: 6px 6px 0 0;
+  font-size: 0.95rem;
+  color: var(--ce);
+  background: #f5f5f5;
+}
+
+.options-tabs a.active {
+  background: #fff;
+  border-color: #ddd;
+  font-weight: 600;
+}
+
+.options-tabs a:hover {
+  background: #fff;
+  text-decoration: none;
+}
+
+/* Cards */
+.card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px;
+  margin: 16px 0;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-hover);
+  transition: box-shadow 0.2s ease;
+}
+
+.card h3 {
+  margin-top: 0;
+}
+
+/* Stats bar */
+.stats-bar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin: 16px 0 24px;
+}
+
+.stat-card {
+  background: var(--card-bg);
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  font-size: 0.95rem;
+}
+
+.stat-card .label {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin-bottom: 6px;
+}
+
+.stat-card .value {
+  font-weight: bold;
+  font-size: 1.05rem;
+}
+
+/* Tables */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.85rem;
+  margin-top: 16px;
+  background: var(--card-bg);
+}
+
+th, td {
+  border: 1px solid #ddd;
+  padding: 6px 8px;
+  text-align: right;
+}
+
+th {
+  background: #f5f5f5;
+  text-align: center;
+  font-weight: 600;
+}
+
+td.symbol {
+  text-align: left;
+}
+
+/* Utility */
+.loading {
+  color: var(--muted);
+  font-style: italic;
+}
+
+.section-title {
+  font-size: 1.1rem;
+  margin: 24px 0 12px;
+  font-weight: bold;
+}
+
+/* Responsive grids */
+.charts-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.key-levels-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+@media (min-width: 900px) {
+  .charts-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .key-levels-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}

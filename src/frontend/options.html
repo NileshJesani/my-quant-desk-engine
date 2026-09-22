@@ -4,69 +4,33 @@
   <meta charset="UTF-8" />
   <title>MyQuantDesk – NIFTY Options</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    h1 { font-size: 1.4rem; }
-    .header {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      margin-bottom: 12px;
-    }
-    .logo {
-      width: 48px;
-      height: 48px;
-      object-fit: contain;
-    }
-    .nav {
-      margin-bottom: 16px;
-      font-size: 0.9rem;
-    }
-    .nav a {
-      color: #1976d2;
-      text-decoration: none;
-      margin-right: 12px;
-    }
-    .tabs {
-      display: flex;
-      gap: 8px;
-      margin: 10px 0 20px;
-      border-bottom: 1px solid #ddd;
-    }
-    .tab {
-      padding: 8px 14px;
-      cursor: pointer;
-      border: 1px solid transparent;
-      border-bottom: none;
-      border-radius: 6px 6px 0 0;
-      font-size: 0.95rem;
-      text-decoration: none;
-      color: #1976d2;
-      display: inline-block;
-    }
-    .tab.active {
-      background: #f5f5f5;
-      border-color: #ddd;
-    }
-  </style>
+  <link rel="stylesheet" href="/static/css/main.css" />
 </head>
 <body>
-  <div class="nav">
-    <a href="/">Home</a>
-    <a href="/options">NIFTY Options</a>
-    <a href="/greek-meter">Greek Risk Meter</a>
+  <div id="topNav"></div>
+  <div id="optionsTabs"></div>
+
+  <h1>MyQuantDesk – NIFTY Options</h1>
+  <p>Welcome to the NIFTY Options hub. Use the tabs above to access:</p>
+  <ul>
+    <li>Option Chain – live option chain with Greeks, OI, and key levels.</li>
+    <li>Greeks-Based Playbook – common strategies with P&L diagrams.</li>
+    <li>Greek Risk Meter – visualize portfolio Greeks and risk.</li>
+  </ul>
+
+  <div class="card">
+    <h3>How to use this</h3>
+    <p>
+      Start with the <strong>Option Chain</strong> to see current OI, IV, and key strikes.
+      Then explore the <strong>Greeks-Based Playbook</strong> to understand strategy payoffs.
+      Use the <strong>Greek Risk Meter</strong> once you have positions to monitor delta, gamma, theta, and vega.
+    </p>
   </div>
 
-  <div class="header">
-    <img src="/static/images/logo.png" alt="MyQuantDesk Logo" class="logo" />
-    <h1>MyQuantDesk – NIFTY Options</h1>
-  </div>
-
-  <div class="tabs">
-    <a class="tab active" href="/options-chain">Option Chain</a>
-    <a class="tab" href="/options-playbook">Greeks-Based Playbook</a>
-  </div>
-
-  <p>Use the tabs above to navigate between Option Chain and Greeks-Based Playbook.</p>
+  <script src="/static/js/nav.js"></script>
+  <script>
+    renderTopNav();
+    renderOptionsTabs('hub');
+  </script>
 </body>
 </html>

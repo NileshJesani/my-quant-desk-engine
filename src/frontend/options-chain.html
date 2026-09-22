@@ -5,165 +5,13 @@
   <title>MyQuantDesk – Option Chain</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 20px; background: #fafafa; }
-    h1 { font-size: 1.4rem; }
-    .header {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      margin-bottom: 12px;
-    }
-    .logo {
-      width: 48px;
-      height: 48px;
-      object-fit: contain;
-    }
-    .nav {
-      margin-bottom: 16px;
-      font-size: 0.9rem;
-    }
-    .nav a {
-      color: #1976d2;
-      text-decoration: none;
-      margin-right: 12px;
-    }
-
-    /* Summary stats bar */
-    .stats-bar {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: 12px;
-      margin: 16px 0 24px;
-    }
-    .stat-card {
-      background: #fff;
-      padding: 14px 16px;
-      border-radius: 8px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-      font-size: 0.95rem;
-    }
-    .stat-card .label {
-      color: #555;
-      font-size: 0.85rem;
-      margin-bottom: 6px;
-    }
-    .stat-card .value {
-      font-weight: bold;
-      font-size: 1.05rem;
-    }
-
-    .section-title {
-      font-size: 1.1rem;
-      margin: 24px 0 12px;
-      font-weight: bold;
-    }
-
-    .controls {
-      margin: 10px 0 20px;
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-    .controls label {
-      font-size: 0.9rem;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .controls input[type="number"],
-    .controls select {
-      padding: 4px 6px;
-      font-size: 0.9rem;
-    }
-
-    table { border-collapse: collapse; width: 100%; font-size: 0.85rem; margin-top: 20px; background: #fff; }
-    th, td { border: 1px solid #ddd; padding: 6px 8px; text-align: right; }
-    th { background: #f5f5f5; text-align: center; font-weight: 600; }
-    td.symbol { text-align: left; }
-    #spot { font-weight: bold; margin-bottom: 4px; }
-    #fetchTime { font-size: 0.85rem; color: #555; margin-bottom: 8px; }
-    .loading { color: #666; font-style: italic; }
-    .atm {
-      background: #fff3cd;
-    }
-
-    .charts {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 24px;
-      margin-top: 24px;
-    }
-    .chart-box {
-      background: #fff;
-      padding: 16px;
-      border-radius: 8px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-    }
-    .chart-box h3 {
-      margin-top: 0;
-      font-size: 1.1rem;
-    }
-
-    /* Key levels */
-    .key-levels {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 16px;
-      margin-top: 24px;
-    }
-    .level-card {
-      background: #fff;
-      padding: 16px;
-      border-radius: 8px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-    }
-    .level-card h3 {
-      margin-top: 0;
-      font-size: 1.1rem;
-    }
-    .level-table {
-      width: 100%;
-      font-size: 0.9rem;
-      margin-top: 8px;
-    }
-    .level-table th, .level-table td {
-      border: 1px solid #ddd;
-      padding: 6px 8px;
-      text-align: right;
-    }
-    .level-table th {
-      background: #f5f5f5;
-      text-align: center;
-      font-weight: 600;
-    }
-    .level-table td.strike-cell {
-      text-align: left;
-      font-weight: 600;
-    }
-
-    @media (min-width: 900px) {
-      .charts {
-        grid-template-columns: 1fr 1fr;
-      }
-      .key-levels {
-        grid-template-columns: 1fr 1fr;
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="/static/css/main.css" />
 </head>
 <body>
-  <div class="nav">
-    <a href="/">Home</a>
-    <a href="/options">NIFTY Options</a>
-    <a href="/greek-meter">Greek Risk Meter</a>
-  </div>
+  <div id="topNav"></div>
+  <div id="optionsTabs"></div>
 
-  <div class="header">
-    <img src="/static/images/logo.png" alt="MyQuantDesk Logo" class="logo" />
-    <h1>MyQuantDesk – Option Chain</h1>
-  </div>
+  <h1>Option Chain</h1>
 
   <!-- Summary stats -->
   <div class="stats-bar" id="statsBar">
@@ -196,27 +44,27 @@
   <div id="spot">Spot LTP: <span class="loading">Loading...</span></div>
   <div id="fetchTime">Data fetched at: <span class="loading">--</span></div>
 
-  <div class="controls">
-    <label>
+  <div class="controls" style="margin:10px 0 20px;display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+    <label style="font-size:0.9rem;display:flex;align-items:center;gap:6px;">
       Option type:
-      <select id="typeFilter">
+      <select id="typeFilter" style="padding:4px 6px;font-size:0.9rem;">
         <option value="ALL">All</option>
         <option value="CE">CE only</option>
         <option value="PE">PE only</option>
       </select>
     </label>
 
-    <label>
+    <label style="font-size:0.9rem;display:flex;align-items:center;gap:6px;">
       Min strike:
-      <input type="number" id="minStrike" step="50" />
+      <input type="number" id="minStrike" step="50" style="padding:4px 6px;font-size:0.9rem;" />
     </label>
 
-    <label>
+    <label style="font-size:0.9rem;display:flex;align-items:center;gap:6px;">
       Max strike:
-      <input type="number" id="maxStrike" step="50" />
+      <input type="number" id="maxStrike" step="50" style="padding:4px 6px;font-size:0.9rem;" />
     </label>
 
-    <label>
+    <label style="font-size:0.9rem;display:flex;align-items:center;gap:6px;">
       <input type="checkbox" id="showAtmOnly" />
       Show ATM only
     </label>
@@ -244,10 +92,10 @@
   </table>
 
   <div class="section-title">Key Levels (Major OI Weightage)</div>
-  <div class="key-levels">
-    <div class="level-card">
+  <div class="key-levels-grid">
+    <div class="card">
       <h3>Top 5 Resistance Strikes (CE OI)</h3>
-      <table class="level-table" id="ceOiTable">
+      <table class="level-table" id="ceOiTable" style="width:100%;font-size:0.9rem;margin-top:8px;">
         <thead>
           <tr>
             <th>Strike</th>
@@ -260,9 +108,9 @@
         </tbody>
       </table>
     </div>
-    <div class="level-card">
+    <div class="card">
       <h3>Top 5 Support Strikes (PE OI)</h3>
-      <table class="level-table" id="peOiTable">
+      <table class="level-table" id="peOiTable" style="width:100%;font-size:0.9rem;margin-top:8px;">
         <thead>
           <tr>
             <th>Strike</th>
@@ -277,12 +125,12 @@
     </div>
   </div>
 
-  <div class="charts">
-    <div class="chart-box">
+  <div class="charts-grid">
+    <div class="card">
       <h3>IV vs Strike</h3>
       <canvas id="ivChart"></canvas>
     </div>
-    <div class="chart-box">
+    <div class="card">
       <h3>OI vs Strike</h3>
       <canvas id="oiChart"></canvas>
     </div>
@@ -294,14 +142,11 @@
     let ivChartInstance = null;
     let oiChartInstance = null;
 
-    // Format symbol: NIFTY2692223450CE -> "NIFTY 22 SEP 26 23450 CE"
     function formatSymbol(symbol) {
-      // Expect pattern: UNDERLYING + DDMMYY + STRIKE + CE/PE
-      // Example: NIFTY2692223450CE
       const match = symbol.match(/^([A-Z]+)(\d{5})(\d+)(CE|PE)$/);
       if (!match) return symbol;
       const underlying = match[1];
-      const expiryCode = match[2]; // DDMMYY
+      const expiryCode = match[2];
       const strike = match[3];
       const type = match[4];
 
@@ -462,7 +307,6 @@
 
       const pcr = totalCeOi > 0 ? (totalPeOi / totalCeOi) : null;
 
-      // Max CE OI strike
       const ceByStrike = {};
       options.filter(o => o.option_type === 'CE').forEach(o => {
         if (!ceByStrike[o.strike_price]) ceByStrike[o.strike_price] = 0;
@@ -477,7 +321,6 @@
         }
       });
 
-      // Max PE OI strike
       const peByStrike = {};
       options.filter(o => o.option_type === 'PE').forEach(o => {
         if (!peByStrike[o.strike_price]) peByStrike[o.strike_price] = 0;
@@ -492,7 +335,6 @@
         }
       });
 
-      // Top 5 CE OI strikes
       const topCe = Object.entries(ceByStrike)
         .map(([strike, oi]) => ({
           strike: Number(strike),
@@ -502,7 +344,6 @@
         .sort((a, b) => b.oi - a.oi)
         .slice(0, 5);
 
-      // Top 5 PE OI strikes
       const topPe = Object.entries(peByStrike)
         .map(([strike, oi]) => ({
           strike: Number(strike),
@@ -539,7 +380,6 @@
       document.getElementById('statMaxPeStrike').textContent =
         stats.maxPeStrike ? stats.maxPeStrike : '--';
 
-      // Top CE table
       const ceTbody = document.querySelector('#ceOiTable tbody');
       ceTbody.innerHTML = '';
       if (stats.topCe.length === 0) {
@@ -556,7 +396,6 @@
         });
       }
 
-      // Top PE table
       const peTbody = document.querySelector('#peOiTable tbody');
       peTbody.innerHTML = '';
       if (stats.topPe.length === 0) {
@@ -578,10 +417,8 @@
       if (!latestData) return;
 
       const spot = latestData.spot_ltp;
-      document.getElementById('spot').textContent =
-        'Spot LTP: ' + (spot ?? 'N/A');
-      document.getElementById('statSpot').textContent =
-        spot ?? 'N/A';
+      document.getElementById('spot').textContent = 'Spot LTP: ' + (spot ?? 'N/A');
+      document.getElementById('statSpot').textContent = spot ?? 'N/A';
 
       const timestamp = latestData.timestamp;
       document.getElementById('fetchTime').textContent =
@@ -594,7 +431,6 @@
 
       atmStrike = computeAtmStrike(spot, latestData.options);
 
-      // Render stats & key levels
       renderStats(latestData.options);
 
       const tbody = document.querySelector('#chain tbody');
@@ -667,6 +503,12 @@
       document.getElementById(id).addEventListener('input', renderChain);
       document.getElementById(id).addEventListener('change', renderChain);
     });
+  </script>
+
+  <script src="/static/js/nav.js"></script>
+  <script>
+    renderTopNav();
+    renderOptionsTabs('chain');
   </script>
 </body>
 </html>
