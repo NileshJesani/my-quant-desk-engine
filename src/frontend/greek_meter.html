@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>MyQuantDesk – Greek Risk Meter</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    h1 { font-size: 1.4rem; }
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 12px;
+    }
+    .logo {
+      width: 48px;
+      height: 48px;
+      object-fit: contain;
+    }
+    .nav {
+      margin-bottom: 16px;
+      font-size: 0.9rem;
+    }
+    .nav a {
+      color: #1976d2;
+      text-decoration: none;
+      margin-right: 12px;
+    }
+    .controls {
+      margin: 10px 0 20px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .controls label {
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .controls select {
+      padding: 4px 6px;
+      font-size: 0.9rem;
+    }
+    .loading { color: #666; font-style: italic; }
+    .section {
+      background: #fff;
+      padding: 16px 18px;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      margin-bottom: 16px;
+    }
+    .section h2 {
+      font-size: 1.1rem;
+      margin-top: 0;
+      margin-bottom: 8px;
+    }
+    .risk-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 8px 0;
+      font-size: 0.95rem;
+    }
+    .risk-label {
+      flex: 1;
+    }
+    .risk-meter {
+      width: 180px;
+      height: 14px;
+      border-radius: 7px;
+      background: #eee;
+      overflow: hidden;
+      position: relative;
+    }
+    .risk-fill {
+      height: 100%;
+      width: 0%;
+      transition: width 0.3s ease, background-color 0.3s ease;
+    }
+    .risk-text {
+      width: 80px;
+      text-align: right;
+      font-weight: 600;
+    }
+    .summary {
+      font-size: 0.95rem;
+      line-height: 1.5;
+      color: #333;
+    }
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 10px;
+      margin-top: 8px;
+      font-size: 0.9rem;
+    }
+    .detail-item {
+      background: #f9f9f9;
+      padding: 8px;
+      border-radius: 6px;
+    }
+    .detail-item .label {
+      font-size: 0.8rem;
+      color: #666;
+    }
+    .detail-item .value {
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="nav">
+    <a href="/">Home</a>
+    <a href="/options">NIFTY Options</a>
+    <a href="/greek-meter">Greek Risk Meter</a>
+  </div>
+
+  <div class="header">
+    <img src="/static/images/logo.png" alt="MyQuantDesk Logo" class="logo" />
+    <h1>MyQuantDesk – Greek Risk Meter (NIFTY)</h1>
+  </div>
+
+  <div class="section">
+    <h2>Select option</h2>
+    <div class="controls">
+      <label>
+        Option type:
+        <select id="optionType">
+          <option value="CE">CE</option>
+          <option value="PE">PE</option>
+        </select>
+      </label>
+
+      <label>
+        Strike:
+        <select id="strikeSelect">
+          <option value="" disabled selected>Loading strikes...</option>
+        </select>
+      </label>
+
+      <label>
+        Position:
+        <select id="position">
+          <option value="LONG">Long</option>
+          <option value="SHORT">Short</option>
+        </select>
+      </label>
+    </div>
+
+    <div id="noData" class="loading">Loading snapshot data...</div>
+  </div>
+
+  <div class="section" id="contractSection" style="display:none;">
+    <h2>Contract details</h2>
+    <div class="detail-grid">
+      <div class="detail-item">
+        <div class="label">Symbol</div>
+        <div class="value" id="symValue">-</div>
+      </div>
+      <div class="detail-item">
+        <div class="label">Strike</div>
+        <div class="value" id="strikeValue">-</div>
+      </div>
+      <div class="detail-item">
+        <div class="label">Type</div>
+        <div class="value" id="typeValue">-</div>
+      </div>
+      <div class="detail-item">
+        <div class="label">LTP</div>
+        <div class="value" id="ltpValue">-</div>
+      </div>
+      <div class="detail-item">
+        <div class="label">IV</div>
+        <div class="value" id="ivValue">-</div>
+      </div>
+      <div class="detail-item">
+        <div class="label">OI</div>
+        <div class="value" id="oiValue">-</div>
+      </div>
+    </div>
+
+    <h2 style="margin-top:16px;">Greeks (from Fyers)</h2>
+    <div class="detail-grid">
+      <div class="detail-item">
+        <div class="label">Delta</div>
+        <div class="value" id="deltaValue">-</div>
+      </div>
+      <div class="detail-item">
+        <div class="label">Gamma</div>
+        <div class="value" id="gammaValue">-</div>
+      </div>
+      <div class="detail-item">
+        <div class="label">Theta</div>
+        <div class="value" id="thetaValue">-</div>
+      </div>
+      <div class="detail-item">
+        <div class="label">Vega</div>
+        <div class="value" id="vegaValue">-</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section" id="riskSection" style="display:none;">
+    <h2>Greek Risk Meter</h2>
+
+    <div class="risk-row">
+      <div class="risk-label">Directional risk (delta)</div>
+      <div class="risk-meter">
+        <div class="risk-fill" id="deltaFill"></div>
+      </div>
+      <div class="risk-text" id="deltaText">-</div>
+    </div>
+
+    <div class="risk-row">
+      <div class="risk-label">Gamma risk</div>
+      <div class="risk-meter">
+        <div class="risk-fill" id="gammaFill"></div>
+      </div>
+      <div class="risk-text" id="gammaText">-</div>
+    </div>
+
+    <div class="risk-row">
+      <div class="risk-label">Time decay risk (theta)</div>
+      <div class="risk-meter">
+        <div class="risk-fill" id="thetaFill"></div>
+      </div>
+      <div class="risk-text" id="thetaText">-</div>
+    </div>
+
+    <div class="risk-row">
+      <div class="risk-label">Volatility risk (vega)</div>
+      <div class="risk-meter">
+        <div class="risk-fill" id="vegaFill"></div>
+      </div>
+      <div class="risk-text" id="vegaText">-</div>
+    </div>
+
+    <h2 style="margin-top:16px;">Interpretation</h2>
+    <div class="summary" id="summaryText">
+      Select an option to see the risk summary.
+    </div>
+  </div>
+
+  <script>
+    let snapshot = null;
+    let nearestExpiryOptions = [];
+
+    function groupOptionsByExpiry(options) {
+      // For v1, we'll just take all options and assume nearest expiry is dominant.
+      // If Fyers adds expiry info later, we can refine this.
+      return options;
+    }
+
+    function populateStrikes(options, optionType) {
+      const filtered = options.filter(o => o.option_type === optionType);
+      const strikes = [...new Set(filtered.map(o => o.strike_price))].sort((a,b)=>a-b);
+
+      const select = document.getElementById('strikeSelect');
+      select.innerHTML = '';
+      if (strikes.length === 0) {
+        const opt = document.createElement('option');
+        opt.textContent = 'No strikes available';
+        opt.disabled = true;
+        opt.selected = true;
+        select.appendChild(opt);
+        return [];
+      }
+      strikes.forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s;
+        opt.textContent = s;
+        select.appendChild(opt);
+      });
+      return filtered;
+    }
+
+    function getSelectedContract(options, type, strike) {
+      return options.find(o => o.option_type === type && o.strike_price === Number(strike));
+    }
+
+    function classifyRisk(value, thresholds) {
+      // thresholds: [lowMax, medMax]
+      const absVal = Math.abs(value);
+      if (absVal <= thresholds[0]) return 'Low';
+      if (absVal <= thresholds[1]) return 'Medium';
+      return 'High';
+    }
+
+    function riskToColor(risk) {
+      if (risk === 'Low') return '#4caf50';
+      if (risk === 'Medium') return '#ff9800';
+      return '#f44336';
+    }
+
+    function riskToPercent(risk) {
+      if (risk === 'Low') return 33;
+      if (risk === 'Medium') return 66;
+      return 100;
+    }
+
+    function updateRiskMeter(fillEl, textEl, risk) {
+      fillEl.style.width = riskToPercent(risk) + '%';
+      fillEl.style.backgroundColor = riskToColor(risk);
+      textEl.textContent = risk;
+    }
+
+    function generateSummary(contract, position, deltaRisk, gammaRisk, thetaRisk, vegaRisk) {
+      const isLong = position === 'LONG';
+      const type = contract.option_type;
+      const moneyness = Math.abs(contract.delta || 0) > 0.7 ? (contract.delta > 0 ? 'Deep ITM' : 'Deep ITM') :
+                        Math.abs(contract.delta || 0) < 0.3 ? 'OTM' : 'ATM/NTM';
+
+      let parts = [];
+
+      // Directional
+      if (deltaRisk === 'High') {
+        parts.push(isLong
+          ? `This ${type} has high directional risk; P&L is very sensitive to underlying moves.`
+          : `This short ${type} has high directional risk; adverse moves can cause large losses.`);
+      } else if (deltaRisk === 'Medium') {
+        parts.push(isLong
+          ? `Moderate directional exposure; underlying moves will matter, but not dominate.`
+          : `Short position with moderate directional risk; monitor underlying closely.`);
+      } else {
+        parts.push(`Low directional risk; underlying moves have limited impact on P&L.`);
+      }
+
+      // Gamma
+      if (gammaRisk === 'High') {
+        parts.push(`Gamma risk is high, especially near expiry or ATM; small moves can cause large Greek changes.`);
+      } else if (gammaRisk === 'Medium') {
+        parts.push(`Moderate gamma risk; delta will change noticeably with underlying moves.`);
+      } else {
+        parts.push(`Gamma risk is low; delta is relatively stable.`);
+      }
+
+      // Theta
+      if (thetaRisk === 'High') {
+        parts.push(isLong
+          ? `High time decay risk; theta works strongly against this long position.`
+          : `High theta benefit for this short position, but with significant risk if underlying moves.`);
+      } else if (thetaRisk === 'Medium') {
+        parts.push(`Moderate time decay; theta has a noticeable but not dominant effect.`);
+      } else {
+        parts.push(`Low time decay risk; theta impact is small.`);
+      }
+
+      // Vega
+      if (vegaRisk === 'High') {
+        parts.push(isLong
+          ? `High volatility risk; position is very sensitive to IV changes.`
+          : `Short position with high vega risk; IV spikes can cause significant losses.`);
+      } else if (vegaRisk === 'Medium') {
+        parts.push(`Moderate sensitivity to IV changes; vega is a secondary risk.`);
+      } else {
+        parts.push(`Low volatility risk; IV changes have limited impact.`);
+      }
+
+      return parts.join(' ');
+    }
+
+    function render() {
+      if (!snapshot) return;
+
+      const type = document.getElementById('optionType').value;
+      const strike = document.getElementById('strikeSelect').value;
+      const position = document.getElementById('position').value;
+
+      if (!strike || !snapshot.options) {
+        document.getElementById('contractSection').style.display = 'none';
+        document.getElementById('riskSection').style.display = 'none';
+        return;
+      }
+
+      const contract = getSelectedContract(snapshot.options, type, Number(strike));
+      if (!contract) {
+        document.getElementById('contractSection').style.display = 'none';
+        document.getElementById('riskSection').style.display = 'none';
+        return;
+      }
+
+      // Show contract details
+      document.getElementById('symValue').textContent = contract.symbol;
+      document.getElementById('strikeValue').textContent = contract.strike_price;
+      document.getElementById('typeValue').textContent = contract.option_type;
+      document.getElementById('ltpValue').textContent = contract.ltp ?? '-';
+      document.getElementById('ivValue').textContent = (contract.iv != null ? contract.iv : '-');
+      document.getElementById('oiValue').textContent = (contract.oi != null ? contract.oi : '-');
+
+      document.getElementById('deltaValue').textContent = (contract.delta != null ? contract.delta : '-');
+      document.getElementById('gammaValue').textContent = (contract.gamma != null ? contract.gamma : '-');
+      document.getElementById('thetaValue').textContent = (contract.theta != null ? contract.theta : '-');
+      document.getElementById('vegaValue').textContent = (contract.vega != null ? contract.vega : '-');
+
+      document.getElementById('contractSection').style.display = 'block';
+      document.getElementById('riskSection').style.display = 'block';
+
+      // Simple thresholds (can be tuned later)
+      const deltaRisk = classifyRisk(contract.delta ?? 0, [0.3, 0.6]);
+      const gammaRisk = classifyRisk(contract.gamma ?? 0, [0.002, 0.005]);
+      const thetaRisk = classifyRisk(contract.theta ?? 0, [5, 15]);
+      const vegaRisk = classifyRisk(contract.vega ?? 0, [5, 12]);
+
+      const deltaFill = document.getElementById('deltaFill');
+      const deltaText = document.getElementById('deltaText');
+      updateRiskMeter(deltaFill, deltaText, deltaRisk);
+
+      const gammaFill = document.getElementById('gammaFill');
+      const gammaText = document.getElementById('gammaText');
+      updateRiskMeter(gammaFill, gammaText, gammaRisk);
+
+      const thetaFill = document.getElementById('thetaFill');
+      const thetaText = document.getElementById('thetaText');
+      updateRiskMeter(thetaFill, thetaText, thetaRisk);
+
+      const vegaFill = document.getElementById('vegaFill');
+      const vegaText = document.getElementById('vegaText');
+      updateRiskMeter(vegaFill, vegaText, vegaRisk);
+
+      const summary = generateSummary(contract, position, deltaRisk, gammaRisk, thetaRisk, vegaRisk);
+      document.getElementById('summaryText').textContent = summary;
+    }
+
+    async function loadSnapshot() {
+      try {
+        const res = await fetch('/snapshot');
+        if (!res.ok) throw new Error('Failed to fetch snapshot');
+        const data = await res.json();
+        snapshot = data;
+        nearestExpiryOptions = groupOptionsByExpiry(data.options || []);
+
+        document.getElementById('noData').style.display = 'none';
+
+        // Populate strikes for initial type
+        populateStrikes(nearestExpiryOptions, document.getElementById('optionType').value);
+
+        render();
+      } catch (err) {
+        document.getElementById('noData').textContent = 'Error loading snapshot data.';
+        console.error(err);
+      }
+    }
+
+    loadSnapshot();
+
+    // Re-populate strikes when option type changes
+    document.getElementById('optionType').addEventListener('change', () => {
+      if (!snapshot) return;
+      populateStrikes(nearestExpiryOptions, document.getElementById('optionType').value);
+      render();
+    });
+
+    document.getElementById('strikeSelect').addEventListener('change', render);
+    document.getElementById('position').addEventListener('change', render);
+  </script>
+</body>
+</html>

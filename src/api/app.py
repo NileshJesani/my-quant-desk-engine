@@ -1,8 +1,8 @@
 import time
 from typing import Optional
-from fastapi import FastAPI  # type: ignore[import-not-found]
-from fastapi.responses import JSONResponse, FileResponse  # type: ignore[import-not-found]
-from fastapi.staticfiles import StaticFiles  # type: ignore[import-not-found]
+from fastapi import FastAPI
+from fastapi.responses import JSONResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 
 from ..greeks_engine.option_chain import fetch_nifty_option_chain, OptionChainSnapshot
@@ -87,6 +87,16 @@ async def options_page():
             content={"error": "frontend/options.html not found"},
         )
     return FileResponse(str(options_path))
+
+@app.get("/greek-meter")
+async def greek_meter_page():
+    meter_path = frontend_dir / "greek_meter.html"
+    if not meter_path.exists():
+        return JSONResponse(
+            status_code=500,
+            content={"error": "frontend/greek_meter.html not found"},
+        )
+    return FileResponse(str(meter_path))
 
 if __name__ == "__main__":
     import uvicorn
