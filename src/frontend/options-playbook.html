@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>MyQuantDesk – Greeks-Based Playbook</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    h1 { font-size: 1.4rem; }
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 12px;
+    }
+    .logo {
+      width: 48px;
+      height: 48px;
+      object-fit: contain;
+    }
+    .nav {
+      margin-bottom: 16px;
+      font-size: 0.9rem;
+    }
+    .nav a {
+      color: #1976d2;
+      text-decoration: none;
+      margin-right: 12px;
+    }
+    .playbook-controls {
+      margin: 10px 0 16px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .playbook-controls label {
+      font-size: 0.95rem;
+    }
+    .playbook-controls select {
+      padding: 6px 8px;
+      font-size: 0.95rem;
+    }
+    .strategy-card {
+      background: #fff;
+      padding: 18px 20px;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      margin-top: 12px;
+    }
+    .strategy-card h3 {
+      margin-top: 0;
+      font-size: 1.2rem;
+    }
+    .strategy-card h4 {
+      font-size: 1.05rem;
+      margin-top: 16px;
+      margin-bottom: 6px;
+    }
+    .strategy-card ul {
+      margin-top: 6px;
+      margin-bottom: 12px;
+    }
+    .strategy-card li {
+      margin-bottom: 6px;
+    }
+    .chart-container {
+      margin-top: 20px;
+      background: #fff;
+      padding: 16px;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+  </style>
+</head>
+<body>
+  <div class="nav">
+    <a href="/">Home</a>
+    <a href="/options">NIFTY Options</a>
+    <a href="/greek-meter">Greek Risk Meter</a>
+  </div>
+
+  <div class="header">
+    <img src="/static/images/logo.png" alt="MyQuantDesk Logo" class="logo" />
+    <h1>MyQuantDesk – Greeks-Based Playbook</h1>
+  </div>
+
+  <div class="playbook-controls">
+    <label for="strategySelect">Select strategy:</label>
+    <select id="strategySelect">
+      <!-- Strategies will be populated dynamically -->
+    </select>
+  </div>
+
+  <div id="strategyContent" class="strategy-card">
+    <h3>Loading strategy...</h3>
+  </div>
+
+  <div class="chart-container">
+    <h3>P&L at Expiry vs Underlying</h3>
+    <canvas id="playbookChart"></canvas>
+    <p id="playbookChartMsg" class="loading" style="display:none;color:#666;">Loading chart...</p>
+  </div>
+
+  <script>
+    let playbookChartInstance = null;
+    const EXAMPLE_SPOT = 23000;
+
+    const strategies = {
+      "long-straddle": {
+        label: "Long Straddle (NIFTY)",
+        title: "Long Straddle (NIFTY)",
+        useCase: `
+          <p>Used when you expect a big move in NIFTY but are unsure of direction (e.g., before major events like Budget, RBI policy, or global data).</p>
+        `,
+        greekProfile: `
+          <ul>
+            <li>Delta: Near 0 (directionally neutral at entry).</li>
+            <li>Gamma: Positive; benefits from large moves in either direction.</li>
+            <li>Theta: Negative; time decay works against you every day.</li>
+            <li>Vega: Positive; benefits from an increase in IV.</li>
+          </ul>
+        `,
+        evolution: `
+          <ul>
+            <li><strong>Underlying move:</strong> Large moves in NIFTY increase P&L due to positive gamma.</li>
+            <li><strong>IV change:</strong> Rising IV boosts both calls and puts; falling IV hurts the position.</li>
+            <li><strong>Time:</strong> As DTE reduces, theta decay accelerates, especially in the last 7–10 days.</li>
+          </ul>
+        `,
+        rules: `
+          <ul>
+            <li>Consider entering when IV is relatively low vs recent history.</li>
+            <li>If a large move happens quickly, consider booking partial profits before theta accelerates.</li>
+            <li>If IV collapses and no move materializes, be prepared to exit before expiry to limit theta loss.</li>
+          </ul>
+        `,
+        params: {
+          spot: EXAMPLE_SPOT,
+          strikeCE: EXAMPLE_SPOT,
+          strikePE: EXAMPLE_SPOT,
+          premCE: 200,
+          premPE: 200,
+        },
+        pnlFunction: function(S_T, p) {
+          const K = p.strikeCE;
+          const cePayoff = Math.max(S_T - K, 0);
+          const pePayoff = Math.max(K - S_T, 0);
+          const totalPrem = p.premCE + p.premPE;
+          return cePayoff + pePayoff - totalPrem;
+        },
+      },
+      "short-strangle": {
+        label: "Short Strangle (NIFTY)",
+        title: "Short Strangle (NIFTY)",
+        useCase: `
+          <p>Used when you expect NIFTY to stay in a range and/or IV to fall. Typically sold OTM call and OTM put.</p>
+        `,
+        greekProfile: `
+          <ul>
+            <li>Delta: Near 0 at entry (if strikes are symmetric around spot).</li>
+            <li>Gamma: Negative; adverse moves can cause fast delta changes and losses.</li>
+            <li>Theta: Positive; time decay works in your favor.</li>
+            <li>Vega: Negative; you benefit from IV falling.</li>
+          </ul>
+        `,
+        evolution: `
+          <ul>
+            <li><strong>Underlying move:</strong> Large moves towards or beyond short strikes increase risk sharply (negative gamma).</li>
+            <li><strong>IV change:</strong> Rising IV increases mark-to-market losses; falling IV helps.</li>
+            <li><strong>Time:</strong> Theta benefit increases as expiry approaches, but so does gamma risk near short strikes.</li>
+          </ul>
+        `,
+        rules: `
+          <ul>
+            <li>Prefer entering when IV is relatively high vs recent history.</li>
+            <li>Define max loss and adjust/roll if underlying approaches a short strike.</li>
+            <li>Consider closing or hedging if 50–75% of max profit is achieved well before expiry.</li>
+          </ul>
+        `,
+        params: {
+          spot: EXAMPLE_SPOT,
+          strikeCE: EXAMPLE_SPOT + 500,
+          strikePE: EXAMPLE_SPOT - 500,
+          premCE: 120,
+          premPE: 120,
+        },
+        pnlFunction: function(S_T, p) {
+          const Kc = p.strikeCE;
+          const Kp = p.strikePE;
+          const cePayoff = -Math.max(S_T - Kc, 0);
+          const pePayoff = -Math.max(Kp - S_T, 0);
+          const totalPrem = p.premCE + p.premPE;
+          return cePayoff + pePayoff + totalPrem;
+        },
+      },
+      "bull-call-spread": {
+        label: "Bull Call Spread (NIFTY)",
+        title: "Bull Call Spread (NIFTY)",
+        useCase: `
+          <p>Used when you are moderately bullish on NIFTY. Buy lower strike call, sell higher strike call (same expiry).</p>
+        `,
+        greekProfile: `
+          <ul>
+            <li>Delta: Positive (bullish).</li>
+            <li>Gamma: Positive but capped; benefits from upside move up to short strike.</li>
+            <li>Theta: Slightly negative; time decay hurts, but less than a plain long call.</li>
+            <li>Vega: Slightly positive; benefits from IV rise, but less than a plain long call.</li>
+          </ul>
+        `,
+        evolution: `
+          <ul>
+            <li><strong>Underlying move:</strong> Best case: NIFTY closes at or above short strike at expiry.</li>
+            <li><strong>IV change:</strong> Rising IV helps, but effect is muted due to short call.</li>
+            <li><strong>Time:</strong> Theta decay is present but limited; still prefer a timely move.</li>
+          </ul>
+        `,
+        rules: `
+          <ul>
+            <li>Use when you expect a moderate upside, not a huge spike.</li>
+            <li>Book profits if underlying reaches near short strike before expiry.</li>
+            <li>Be ready to exit if the view is invalidated (e.g., breakdown below support).</li>
+          </ul>
+        `,
+        params: {
+          spot: EXAMPLE_SPOT,
+          strikeLongCE: EXAMPLE_SPOT,
+          strikeShortCE: EXAMPLE_SPOT + 400,
+          premLongCE: 220,
+          premShortCE: 90,
+        },
+        pnlFunction: function(S_T, p) {
+          const Kl = p.strikeLongCE;
+          const Ks = p.strikeShortCE;
+          const longPayoff = Math.max(S_T - Kl, 0);
+          const shortPayoff = -Math.max(S_T - Ks, 0);
+          const netPrem = -p.premLongCE + p.premShortCE;
+          return longPayoff + shortPayoff + netPrem;
+        },
+      },
+      "iron-condor": {
+        label: "Iron Condor (NIFTY)",
+        title: "Iron Condor (NIFTY)",
+        useCase: `
+          <p>Range-bound strategy: sell OTM call spread + sell OTM put spread. Profits if NIFTY stays between short strikes.</p>
+        `,
+        greekProfile: `
+          <ul>
+            <li>Delta: Near 0 at entry (if centered around spot).</li>
+            <li>Gamma: Negative; large moves increase risk.</li>
+            <li>Theta: Positive; time decay works in your favor.</li>
+            <li>Vega: Negative; benefits from falling IV.</li>
+          </ul>
+        `,
+        evolution: `
+          <ul>
+            <li><strong>Underlying move:</strong> Best case: NIFTY stays between short strikes till expiry.</li>
+            <li><strong>IV change:</strong> Falling IV improves P&L; rising IV hurts.</li>
+            <li><strong>Time:</strong> Theta benefit grows as expiry nears, but gamma risk also increases near short strikes.</li>
+          </ul>
+        `,
+        rules: `
+          <ul>
+            <li>Enter when IV is relatively high and you expect low volatility.</li>
+            <li>Adjust or roll the tested side if underlying approaches a short strike.</li>
+            <li>Consider closing early if a large portion of max profit is achieved.</li>
+          </ul>
+        `,
+        params: {
+          spot: EXAMPLE_SPOT,
+          strikeLongPE: EXAMPLE_SPOT - 600,
+          strikeShortPE: EXAMPLE_SPOT - 300,
+          strikeShortCE: EXAMPLE_SPOT + 300,
+          strikeLongCE: EXAMPLE_SPOT + 600,
+          premLongPE: 40,
+          premShortPE: 90,
+          premShortCE: 90,
+          premLongCE: 40,
+        },
+        pnlFunction: function(S_T, p) {
+          const Klp = p.strikeLongPE;
+          const Ksp = p.strikeShortPE;
+          const putLongPayoff = Math.max(Klp - S_T, 0);
+          const putShortPayoff = -Math.max(Ksp - S_T, 0);
+          const putPrem = -p.premLongPE + p.premShortPE;
+
+          const Ksc = p.strikeShortCE;
+          const Klc = p.strikeLongCE;
+          const callShortPayoff = -Math.max(S_T - Ksc, 0);
+          const callLongPayoff = Math.max(S_T - Klc, 0);
+          const callPrem = p.premShortCE - p.premLongCE;
+
+          return putLongPayoff + putShortPayoff + callShortPayoff + callLongPayoff + putPrem + callPrem;
+        },
+      },
+      "long-put": {
+        label: "Long Put (Protective) (NIFTY)",
+        title: "Long Put (Protective) (NIFTY)",
+        useCase: `
+          <p>Used to protect a long NIFTY/portfolio against downside. Acts like insurance.</p>
+        `,
+        greekProfile: `
+          <ul>
+            <li>Delta: Negative (benefits from downside).</li>
+            <li>Gamma: Positive; delta becomes more negative as underlying falls.</li>
+            <li>Theta: Negative; time decay works against you.</li>
+            <li>Vega: Positive; benefits from rising IV (often happens in stress).</li>
+          </ul>
+        `,
+        evolution: `
+          <ul>
+            <li><strong>Underlying move:</strong> Downside moves increase put value; upside moves erode premium.</li>
+            <li><strong>IV change:</strong> Rising IV (panic) increases put value; falling IV reduces it.</li>
+            <li><strong>Time:</strong> Theta decay is constant; more pronounced in last 2 weeks.</li>
+          </ul>
+        `,
+        rules: `
+          <ul>
+            <li>Size the put so that protection cost is acceptable vs portfolio value.</li>
+            <li>Roll puts forward in time if protection is needed beyond current expiry.</li>
+            <li>Accept that in calm markets, this will be a recurring cost (like insurance premium).</li>
+          </ul>
+        `,
+        params: {
+          spot: EXAMPLE_SPOT,
+          strikePE: EXAMPLE_SPOT - 300,
+          premPE: 120,
+        },
+        pnlFunction: function(S_T, p) {
+          const K = p.strikePE;
+          const payoff = Math.max(K - S_T, 0);
+          const netPrem = -p.premPE;
+          return payoff + netPrem;
+        },
+      },
+    };
+
+    function populateStrategyDropdown() {
+      const select = document.getElementById('strategySelect');
+      select.innerHTML = '';
+      Object.entries(strategies).forEach(([key, s]) => {
+        const opt = document.createElement('option');
+        opt.value = key;
+        opt.textContent = s.label;
+        select.appendChild(opt);
+      });
+    }
+
+    function renderPlaybookChart(strategyKey) {
+      const msgEl = document.getElementById('playbookChartMsg');
+      const canvas = document.getElementById('playbookChart');
+
+      if (!window.Chart) {
+        if (msgEl) {
+          msgEl.style.display = 'block';
+          msgEl.textContent = 'Chart library not loaded yet. Please wait a moment and refresh.';
+        }
+        console.warn('Chart.js not available yet');
+        return;
+      }
+
+      if (msgEl) msgEl.style.display = 'none';
+
+      const s = strategies[strategyKey];
+      if (!s) return;
+
+      const spot = s.params.spot || EXAMPLE_SPOT;
+      const minS = Math.floor(spot * 0.9 / 50) * 50;
+      const maxS = Math.ceil(spot * 1.1 / 50) * 50;
+      const step = 50;
+
+      const labels = [];
+      const data = [];
+
+      for (let S = minS; S <= maxS; S += step) {
+        labels.push(S);
+        data.push(s.pnlFunction(S, s.params));
+      }
+
+      const ctx = canvas.getContext('2d');
+
+      const chartData = {
+        labels,
+        datasets: [
+          {
+            label: 'P&L at expiry',
+            data,
+            borderColor: 'rgba(25, 118, 210, 1)',
+            backgroundColor: 'rgba(25, 118, 210, 0.1)',
+            tension: 0.2,
+            pointRadius: 0,
+            fill: true,
+          },
+        ],
+      };
+
+      const chartOptions = {
+        responsive: true,
+        interaction: {
+          intersect: false,
+          mode: 'index',
+        },
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: 'Underlying at expiry',
+            },
+          },
+          y: {
+            title: {
+              display: true,
+              text: 'P&L',
+            },
+          },
+        },
+      };
+
+      try {
+        if (playbookChartInstance) {
+          playbookChartInstance.data = chartData;
+          playbookChartInstance.options = chartOptions;
+          playbookChartInstance.update();
+        } else {
+          playbookChartInstance = new Chart(ctx, {
+            type: 'line',
+            data: chartData,
+            options: chartOptions,
+          });
+        }
+      } catch (err) {
+        console.error('Error creating/updating playbook chart:', err);
+        if (msgEl) {
+          msgEl.style.display = 'block';
+          msgEl.textContent = 'Error rendering chart. See browser console for details.';
+        }
+      }
+    }
+
+    function renderPlaybook() {
+      const key = document.getElementById('strategySelect').value;
+      const s = strategies[key];
+      if (!s) {
+        document.getElementById('strategyContent').innerHTML =
+          '<p>Strategy not found.</p>';
+        return;
+      }
+
+      document.getElementById('strategyContent').innerHTML = `
+        <h3>${s.title}</h3>
+        <h4>Typical use case</h4>
+        ${s.useCase}
+
+        <h4>Starting Greek profile</h4>
+        ${s.greekProfile}
+
+        <h4>How Greeks evolve</h4>
+        ${s.evolution}
+
+        <h4>Simple rules / adjustments</h4>
+        ${s.rules}
+      `;
+
+      renderPlaybookChart(key);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      populateStrategyDropdown();
+      renderPlaybook();
+    });
+
+    document.getElementById('strategySelect').addEventListener('change', renderPlaybook);
+  </script>
+</body>
+</html>

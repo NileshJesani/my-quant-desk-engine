@@ -98,6 +98,14 @@ async def greek_meter_page():
         )
     return FileResponse(str(meter_path))
 
+@app.get("/options-chain")
+async def get_options_chain():
+    return FileResponse(os.path.join(FRONTEND_DIR, "options-chain.html"))
+
+@app.get("/options-playbook")
+async def get_options_playbook():
+    return FileResponse(os.path.join(FRONTEND_DIR, "options-playbook.html"))
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
