@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>MyQuantDesk – NIFTY Options</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    h1 { font-size: 1.4rem; }
+    .controls {
+      margin: 10px 0 20px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .controls label {
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .controls input[type="number"],
+    .controls select {
+      padding: 4px 6px;
+      font-size: 0.9rem;
+    }
+    table { border-collapse: collapse; width: 100%; font-size: 0.85rem; }
+    th, td { border: 1px solid #ccc; padding: 4px 6px; text-align: right; }
+    th { background: #f5f5f5; text-align: center; }
+    td.symbol { text-align: left; }
+    #spot { font-weight: bold; margin-bottom: 8px; }
+    .loading { color: #666; font-style: italic; }
+    .atm {
+      background: #fff3cd;
+    }
+    .nav {
+      margin-bottom: 16px;
+      font-size: 0.9rem;
+    }
+    .nav a {
+      color: #1976d2;
+      text-decoration: none;
+      margin-right: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="nav">
+    <a href="/">Home</a>
+    <a href="/options">NIFTY Options</a>
+  </div>
+
+  <h1>MyQuantDesk – NIFTY Options Greeks</h1>
+  <div id="spot">Spot LTP: <span class="loading">Loading...</span></div>
+
+  <div class="controls">
+    <label>
+      Option type:
+      <select id="typeFilter">
+        <option value="ALL">All</option>
+        <option value="CE">CE only</option>
+        <option value="PE">PE only</option>
+      </select>
+    </label>
+
+    <label>
+      Min strike:
+      <input type="number" id="minStrike" step="50" />
+    </label>
+
+    <label>
+      Max strike:
+      <input type="number" id="maxStrike" step="50" />
+    </label>
+
+    <label>
+      <input type="checkbox" id="showAtmOnly" />
+      Show ATM only
+    </label>
+  </div>
+
+  <table id="chain">
+    <thead>
+      <tr>
+        <th>Symbol</th>
+        <th>Strike</th>
+        <th>Type</th>
+        <th>LTP</th>
+        <th>IV</th>
+        <th>Delta</th>
+        <th>Gamma</th>
+        <th>Theta</th>
+        <th>Vega</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td colspan="9" class="loading">Loading...</td></tr>
+    </tbody>
+  </table>
+
+  <script>
+    let latestData = null;
+    let atmStrike = null;
+
+    function computeAtmStrike(spot, options) {
+      if (!spot) return null;
+      const strikes = [...new Set(options.map(o => o.strike_price))];
+      if (strikes.length === 0) return null;
+      return strikes.reduce((prev, curr) =>
+        Math.abs(curr - spot) < Math.abs(prev - spot) ? curr : prev
+      );
+    }
+
+    function render() {
+      if (!latestData) return;
+
+      const spot = latestData.spot_ltp;
+      document.getElementById('spot').textContent =
+        'Spot LTP: ' + (spot ?? 'N/A');
+
+      const typeFilter = document.getElementById('typeFilter').value;
+      const minStrike = document.getElementById('minStrike').value;
+      const maxStrike = document.getElementById('maxStrike').value;
+      const showAtmOnly = document.getElementById('showAtmOnly').checked;
+
+      atmStrike = computeAtmStrike(spot, latestData.options);
+
+      const tbody = document.querySelector('#chain tbody');
+      tbody.innerHTML = '';
+
+      let filtered = latestData.options.slice();
+
+      if (typeFilter !== 'ALL') {
+        filtered = filtered.filter(o => o.option_type === typeFilter);
+      }
+      if (minStrike !== '' && !isNaN(Number(minStrike))) {
+        filtered = filtered.filter(o => o.strike_price >= Number(minStrike));
+      }
+      if (maxStrike !== '' && !isNaN(Number(maxStrike))) {
+        filtered = filtered.filter(o => o.strike_price <= Number(maxStrike));
+      }
+      if (showAtmOnly && atmStrike !== null) {
+        filtered = filtered.filter(o => o.strike_price === atmStrike);
+      }
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" class="loading">No options match the filters</td></tr>';
+        return;
+      }
+
+      filtered.forEach(opt => {
+        const tr = document.createElement('tr');
+        const isAtm = atmStrike !== null && opt.strike_price === atmStrike;
+        if (isAtm) tr.classList.add('atm');
+
+        tr.innerHTML = `
+          <td class="symbol">${opt.symbol}</td>
+          <td>${opt.strike_price}</td>
+          <td>${opt.option_type}</td>
+          <td>${opt.ltp}</td>
+          <td>${opt.iv ?? ''}</td>
+          <td>${opt.delta ?? ''}</td>
+          <td>${opt.gamma ?? ''}</td>
+          <td>${opt.theta ?? ''}</td>
+          <td>${opt.vega ?? ''}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function loadSnapshot() {
+      try {
+        const res = await fetch('/snapshot');
+        if (!res.ok) throw new Error('Failed to fetch snapshot');
+        const data = await res.json();
+        latestData = data;
+        render();
+      } catch (err) {
+        document.getElementById('spot').textContent = 'Error loading data';
+        console.error(err);
+      }
+    }
+
+    // Initial load
+    loadSnapshot();
+
+    // Re-fetch every 10 seconds
+    setInterval(loadSnapshot, 10000);
+
+    // Re-render on filter change
+    ['typeFilter', 'minStrike', 'maxStrike', 'showAtmOnly'].forEach(id => {
+      document.getElementById(id).addEventListener('input', render);
+      document.getElementById(id).addEventListener('change', render);
+    });
+  </script>
+</body>
+</html>

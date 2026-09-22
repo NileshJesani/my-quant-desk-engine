@@ -2,79 +2,134 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>MyQuantDesk – NIFTY Options</title>
+  <title>MyQuantDesk – Quantitative Research & Trading Tools</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    h1 { font-size: 1.4rem; }
-    table { border-collapse: collapse; width: 100%; font-size: 0.85rem; }
-    th, td { border: 1px solid #ccc; padding: 4px 6px; text-align: right; }
-    th { background: #f5f5f5; text-align: center; }
-    td.symbol { text-align: left; }
-    #spot { font-weight: bold; }
-    .loading { color: #666; font-style: italic; }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f7f7f7;
+      color: #222;
+      line-height: 1.5;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+    .subtitle {
+      font-size: 1.1rem;
+      color: #555;
+      margin-bottom: 2rem;
+    }
+    .section {
+      background: #fff;
+      padding: 24px 28px;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      margin-bottom: 24px;
+    }
+    .section h2 {
+      font-size: 1.4rem;
+      margin-top: 0;
+      margin-bottom: 0.75rem;
+    }
+    .cta {
+      display: inline-block;
+      background: #1976d2;
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 600;
+      margin-top: 8px;
+    }
+    .disclaimer {
+      font-size: 0.85rem;
+      color: #555;
+      background: #fff8e1;
+      padding: 16px 18px;
+      border-radius: 6px;
+      border: 1px solid #ffe082;
+    }
+    footer {
+      text-align: center;
+      font-size: 0.85rem;
+      color: #777;
+      margin-top: 40px;
+      margin-bottom: 40px;
+    }
   </style>
 </head>
 <body>
-  <h1>MyQuantDesk – NIFTY Options Greeks</h1>
-  <div id="spot">Spot LTP: <span class="loading">Loading...</span></div>
-  <h2>Option Chain</h2>
-  <table id="chain">
-    <thead>
-      <tr>
-        <th>Symbol</th>
-        <th>Strike</th>
-        <th>Type</th>
-        <th>LTP</th>
-        <th>IV</th>
-        <th>Delta</th>
-        <th>Gamma</th>
-        <th>Theta</th>
-        <th>Vega</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr><td colspan="9" class="loading">Loading...</td></tr>
-    </tbody>
-  </table>
+  <div class="container">
+    <h1>MyQuantDesk</h1>
+    <div class="subtitle">
+      Quantitative research and real-time tools for financial markets
+    </div>
+
+    <div class="section">
+      <h2>What we do</h2>
+      <p>
+        MyQuantDesk is a research-focused platform that provides fundamental and
+        technical research on financial markets, sectors, and individual companies.
+        We build quantitative models and real-time tools that help traders and
+        investors measure risk and make more informed decisions.
+      </p>
+      <p>
+        Our tools work on live market data and are designed for:
+      </p>
+      <ul>
+        <li>Options traders who need Greeks and risk metrics in real time.</li>
+        <li>Investors looking for data-driven views on sectors and stocks.</li>
+        <li>Quant enthusiasts building and testing systematic strategies.</li>
+      </ul>
+      <a class="cta" href="/options">Open NIFTY Options Tool</a>
+    </div>
+
+    <div class="section">
+      <h2>Research & tools</h2>
+      <p>
+        We combine quantitative research with practical software:
+      </p>
+      <ul>
+        <li>Fundamental and technical research reports.</li>
+        <li>Real-time options analytics (Greeks, IV, OI, volume).</li>
+        <li>Risk measurement and scenario analysis for positions.</li>
+      </ul>
+      <p>
+        All tools are built to be transparent, data-driven, and focused on risk control.
+      </p>
+    </div>
+
+    <div class="section disclaimer">
+      <h2>SEBI Research Analyst Disclaimer</h2>
+      <p>
+        MyQuantDesk is intended to be a research and analytics platform. The content,
+        models, and tools provided here are for educational and informational purposes
+        only and do not constitute investment advice, recommendations, or an offer to
+        buy or sell any security.
+      </p>
+      <p>
+        Investments in securities are subject to market risks. Please read all
+        related documents carefully before investing. Past performance is not
+        indicative of future results. Users are advised to consult a SEBI-registered
+        investment adviser before making any investment decisions.
+      </p>
+    </div>
+
+    <footer>
+      © <span id="year"></span> MyQuantDesk. All rights reserved.
+    </footer>
+  </div>
 
   <script>
-    async function loadSnapshot() {
-      try {
-        const res = await fetch('/snapshot');
-        if (!res.ok) throw new Error('Failed to fetch snapshot');
-        const data = await res.json();
-        document.getElementById('spot').textContent =
-          'Spot LTP: ' + (data.spot_ltp ?? 'N/A');
-
-        const tbody = document.querySelector('#chain tbody');
-        tbody.innerHTML = '';
-        if (!data.options || data.options.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="9" class="loading">No options data</td></tr>';
-          return;
-        }
-        data.options.forEach(opt => {
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td class="symbol">${opt.symbol}</td>
-            <td>${opt.strike_price}</td>
-            <td>${opt.option_type}</td>
-            <td>${opt.ltp}</td>
-            <td>${opt.iv ?? ''}</td>
-            <td>${opt.delta ?? ''}</td>
-            <td>${opt.gamma ?? ''}</td>
-            <td>${opt.theta ?? ''}</td>
-            <td>${opt.vega ?? ''}</td>
-          `;
-          tbody.appendChild(tr);
-        });
-      } catch (err) {
-        document.getElementById('spot').textContent = 'Error loading data';
-        console.error(err);
-      }
-    }
-
-    loadSnapshot();
+    document.getElementById('year').textContent = new Date().getFullYear();
   </script>
 </body>
 </html>

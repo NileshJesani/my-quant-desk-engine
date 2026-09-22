@@ -1,8 +1,8 @@
 import time
 from typing import Optional
-from fastapi import FastAPI
-from fastapi.responses import JSONResponse, FileResponse
-from fastapi.staticfiles import StaticFiles
+from fastapi import FastAPI  # type: ignore[import-not-found]
+from fastapi.responses import JSONResponse, FileResponse  # type: ignore[import-not-found]
+from fastapi.staticfiles import StaticFiles  # type: ignore[import-not-found]
 from pathlib import Path
 
 from ..greeks_engine.option_chain import fetch_nifty_option_chain, OptionChainSnapshot
@@ -15,7 +15,6 @@ fetch_interval = 5  # seconds
 
 def fetch_latest_snapshot() -> OptionChainSnapshot:
     global latest_snapshot, last_fetch_time
-    # Simple rate-limited fetch
     now = time.time()
     if latest_snapshot is None or (now - last_fetch_time) >= fetch_interval:
         latest_snapshot = fetch_nifty_option_chain(strikecount=1)
@@ -65,14 +64,12 @@ async def get_snapshot():
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 frontend_dir = PROJECT_ROOT / "src" / "frontend"
 
-# Ensure frontend dir exists
 frontend_dir.mkdir(parents=True, exist_ok=True)
 
 app.mount("/static", StaticFiles(directory=str(frontend_dir)), name="static")
 
 @app.get("/")
 async def root():
-    # Serve index.html from frontend/
     index_path = frontend_dir / "index.html"
     if not index_path.exists():
         return JSONResponse(
@@ -80,6 +77,16 @@ async def root():
             content={"error": "frontend/index.html not found"},
         )
     return FileResponse(str(index_path))
+
+@app.get("/options")
+async def options_page():
+    options_path = frontend_dir / "options.html"
+    if not options_path.exists():
+        return JSONResponse(
+            status_code=500,
+            content={"error": "frontend/options.html not found"},
+        )
+    return FileResponse(str(options_path))
 
 if __name__ == "__main__":
     import uvicorn
