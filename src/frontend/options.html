@@ -534,11 +534,10 @@
             <li>If IV collapses and no move materializes, be prepared to exit before expiry to limit theta loss.</li>
           </ul>
         `,
-        // Example: ATM straddle, strikes = spot
         params: {
           spot: EXAMPLE_SPOT,
           strikeCE: EXAMPLE_SPOT,
-          strikePE: EXAMPLE_POT,
+          strikePE: EXAMPLE_SPOT,
           premCE: 200,
           premPE: 200,
         },
