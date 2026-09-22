@@ -6,19 +6,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="/static/css/main.css" />
   <style>
+    :root {
+      --bg-alt: #f3f6fa;
+    }
+
     .hero {
       background: linear-gradient(135deg, #eef4fb 0%, #f5f5f5 100%);
-      padding: 32px 20px;
+      padding: 48px 20px;
       border-radius: var(--radius);
       box-shadow: var(--shadow);
-      margin-bottom: 24px;
+      margin-bottom: 32px;
       text-align: center;
     }
     .logo {
       width: auto;
       height: 72px;
       object-fit: contain;
-      margin-bottom: 12px;
+      margin-bottom: 16px;
     }
     @media (max-width: 600px) {
       .logo {
@@ -26,31 +30,41 @@
       }
     }
     .hero h1 {
-      margin-top: 8px;
-      font-size: 1.8rem;
+      margin: 8px 0 12px;
+      font-size: 2rem;
     }
     .hero p {
       font-size: 1.05rem;
       color: var(--muted);
-      max-width: 800px;
+      max-width: 720px;
       margin: 0 auto;
+      line-height: 1.6;
     }
 
+    .section {
+      padding: 24px 0;
+    }
+    .section-alt {
+      background: var(--bg-alt);
+      padding: 28px 20px;
+      border-radius: var(--radius);
+      margin: 28px 0;
+    }
     .section-title {
-      font-size: 1.3rem;
-      margin: 28px 0 12px;
-      font-weight: bold;
+      font-size: 1.35rem;
+      margin: 0 0 16px;
+      font-weight: 700;
     }
 
     .tools-grid {
       display: grid;
       grid-template-columns: 1fr;
-      gap: 16px;
-      margin-top: 16px;
+      gap: 18px;
+      margin-top: 8px;
     }
     @media (min-width: 900px) {
       .tools-grid {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: repeat(3, 1fr);
       }
     }
 
@@ -58,7 +72,10 @@
       background: var(--card-bg);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
-      padding: 16px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
     }
     .tool-card h3 {
       margin-top: 0;
@@ -67,22 +84,35 @@
     .tool-card p {
       color: var(--muted);
       font-size: 0.95rem;
-      margin-bottom: 12px;
+      margin-bottom: 14px;
+      flex-grow: 1;
     }
-    .tool-card a {
+    .tool-card a, .tool-card .btn {
+      display: inline-block;
+      padding: 8px 14px;
+      background: var(--ce);
+      color: #fff;
+      border-radius: 6px;
+      text-decoration: none;
       font-weight: 600;
+      font-size: 0.95rem;
+      text-align: center;
+    }
+    .tool-card a:hover, .tool-card .btn:hover {
+      background: #1565c0;
+      text-decoration: none;
     }
 
-    .contact-box {
+    .contact-section {
       background: var(--card-bg);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
-      padding: 16px;
+      padding: 20px;
       margin-top: 16px;
     }
 
     .founder-box {
-      margin-top: 24px;
+      margin-top: 20px;
       font-size: 0.95rem;
       color: var(--muted);
     }
@@ -104,6 +134,14 @@
       border-top: 1px solid #ddd;
       font-size: 0.85rem;
       color: var(--muted);
+      text-align: center;
+    }
+    footer a {
+      color: var(--ce);
+      text-decoration: none;
+    }
+    footer a:hover {
+      text-decoration: underline;
     }
   </style>
 </head>
@@ -121,79 +159,91 @@
   </div>
 
   <!-- What we do -->
-  <h2 class="section-title">What we do</h2>
-  <div class="card">
-    <p>
-      MyQuantDesk builds research frameworks and analytical tools across asset classes and market segments.
-      We combine quantitative models, fundamental analysis, and market microstructure to:
-    </p>
-    <ul>
-      <li>Analyze markets, sectors, and companies using systematic approaches.</li>
-      <li>Develop tools for risk assessment, scenario analysis, and strategy evaluation.</li>
-      <li>Provide educational content that bridges quantitative concepts and practical trading/investing.</li>
-    </ul>
-    <p>
-      Our current live tools include analytics for Indian derivatives (NIFTY options),
-      with more research modules and dashboards under development.
-    </p>
+  <div class="section">
+    <h2 class="section-title">What we do</h2>
+    <div class="card">
+      <p>
+        MyQuantDesk builds research frameworks and analytical tools across asset classes and market segments.
+        We combine quantitative models, fundamental analysis, and market microstructure to:
+      </p>
+      <ul>
+        <li>Analyze markets, sectors, and companies using systematic approaches.</li>
+        <li>Develop tools for risk assessment, scenario analysis, and strategy evaluation.</li>
+        <li>Provide educational content that bridges quantitative concepts and practical trading/investing.</li>
+      </ul>
+      <p>
+        Our current live tools include analytics for Indian derivatives (NIFTY options),
+        with more research modules and dashboards under development.
+      </p>
+    </div>
   </div>
 
   <!-- Research & tools -->
-  <h2 class="section-title">Research & tools</h2>
-  <div class="tools-grid">
-    <div class="tool-card">
-      <h3>NIFTY Options Analytics</h3>
-      <p>
-        Live option chain with Greeks, OI, IV, PCR, and key levels. Strategy playbook, Greek risk meter, and educational content.
-      </p>
-      <a href="/options">Explore NIFTY Options →</a>
-    </div>
+  <div class="section-alt">
+    <h2 class="section-title">Research & tools</h2>
+    <div class="tools-grid">
+      <div class="tool-card">
+        <div>
+          <h3>NIFTY Options Analytics</h3>
+          <p>
+            Live option chain with Greeks, OI, IV, PCR, and key levels. Strategy playbook, Greek risk meter, and educational content.
+          </p>
+        </div>
+        <a href="/options">Explore NIFTY Options</a>
+      </div>
 
-    <div class="tool-card">
-      <h3>Options Lab</h3>
-      <p>
-        Concise articles on delta, gamma, theta, vega, and IV/OI, explained with NIFTY examples for traders and investors.
-      </p>
-      <a href="/options/learn">Open Options Lab →</a>
-    </div>
+      <div class="tool-card">
+        <div>
+          <h3>Options Lab</h3>
+          <p>
+            Concise articles on delta, gamma, theta, vega, and IV/OI, explained with NIFTY examples for traders and investors.
+          </p>
+        </div>
+        <a href="/options/learn">Open Options Lab</a>
+      </div>
 
-    <div class="tool-card">
-      <h3>Coming soon</h3>
-      <p>
-        Additional research modules covering broader market analytics, sector studies, and company-level quantitative frameworks.
-      </p>
-      <span style="color:var(--muted);font-size:0.95rem;">Stay tuned.</span>
+      <div class="tool-card">
+        <div>
+          <h3>Coming soon</h3>
+          <p>
+            Additional research modules covering broader market analytics, sector studies, and company-level quantitative frameworks.
+          </p>
+        </div>
+        <span class="btn" style="background:#999;cursor:default;">Stay tuned</span>
+      </div>
     </div>
   </div>
 
   <!-- Business enquiries / Contact -->
-  <h2 class="section-title">Business enquiries / Contact Us</h2>
-  <div class="contact-box">
-    <p>
-      For collaborations, research partnerships, or feedback, reach out at:
-      <br />
-      <strong>contact@myquantdesk.in</strong>
-    </p>
-    <p style="color:var(--muted);font-size:0.9rem;">
-      A dedicated contact page with a form will be added shortly.
-    </p>
-  </div>
+  <div class="section">
+    <h2 class="section-title">Business enquiries / Contact Us</h2>
+    <div class="contact-section">
+      <p>
+        For collaborations, research partnerships, or feedback, reach out at:
+        <br />
+        <strong>contact@myquantdesk.in</strong>
+      </p>
+      <p style="color:var(--muted);font-size:0.9rem;">
+        A dedicated contact page with a form will be added shortly.
+      </p>
+    </div>
 
-  <!-- Founder attribution -->
-  <div class="founder-box">
-    <strong>Nilesh Jesani</strong>, Founder & Owner
-  </div>
+    <!-- Founder attribution -->
+    <div class="founder-box">
+      <strong>Nilesh Jesani</strong>, Founder & Owner
+    </div>
 
-  <!-- SEBI Research Analyst Disclaimer -->
-  <div class="disclaimer-box">
-    <strong>SEBI Research Analyst Disclaimer:</strong>
-    <p style="margin-top:6px;">
-      The content and tools on this website are for educational and informational purposes only.
-      They are not intended as investment advice, recommendations, or offers to buy or sell securities.
-      MyQuantDesk is not a SEBI-registered research analyst or investment adviser. Any decisions made based
-      on this information are solely at your own risk. Please consult a qualified financial adviser before
-      making any investment decisions.
-    </p>
+    <!-- SEBI Research Analyst Disclaimer -->
+    <div class="disclaimer-box">
+      <strong>SEBI Research Analyst Disclaimer:</strong>
+      <p style="margin-top:6px;">
+        The content and tools on this website are for educational and informational purposes only.
+        They are not intended as investment advice, recommendations, or offers to buy or sell securities.
+        MyQuantDesk is not a SEBI-registered research analyst or investment adviser. Any decisions made based
+        on this information are solely at your own risk. Please consult a qualified financial adviser before
+        making any investment decisions.
+      </p>
+    </div>
   </div>
 
   <!-- Footer -->
