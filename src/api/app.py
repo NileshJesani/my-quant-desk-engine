@@ -101,11 +101,24 @@ async def greek_meter_page():
 
 @app.get("/options-chain")
 async def get_options_chain():
-    return FileResponse(os.path.join(FRONTEND_DIR, "options-chain.html"))
+    chain_path = frontend_dir / "options-chain.html"
+    if not chain_path.exists():
+        return JSONResponse(
+            status_code=500,
+            content={"error": "frontend/options-chain.html not found"},
+        )
+    return FileResponse(str(chain_path))
+
 
 @app.get("/options-playbook")
 async def get_options_playbook():
-    return FileResponse(os.path.join(FRONTEND_DIR, "options-playbook.html"))
+    playbook_path = frontend_dir / "options-playbook.html"
+    if not playbook_path.exists():
+        return JSONResponse(
+            status_code=500,
+            content={"error": "frontend/options-playbook.html not found"},
+        )
+    return FileResponse(str(playbook_path))
 
 if __name__ == "__main__":
     import uvicorn
