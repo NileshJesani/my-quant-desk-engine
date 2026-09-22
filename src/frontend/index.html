@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>MyQuantDesk – Quant Research & Tools for Indian Markets</title>
+  <title>MyQuantDesk – Quantitative Research for Financial Markets</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="/static/css/main.css" />
   <style>
@@ -12,15 +12,28 @@
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       margin-bottom: 24px;
+      text-align: center;
+    }
+    .logo {
+      width: auto;
+      height: 72px;
+      object-fit: contain;
+      margin-bottom: 12px;
+    }
+    @media (max-width: 600px) {
+      .logo {
+        height: 56px;
+      }
     }
     .hero h1 {
-      margin-top: 0;
+      margin-top: 8px;
       font-size: 1.8rem;
     }
     .hero p {
       font-size: 1.05rem;
       color: var(--muted);
-      max-width: 700px;
+      max-width: 800px;
+      margin: 0 auto;
     }
 
     .section-title {
@@ -98,10 +111,12 @@
 
   <!-- Hero -->
   <div class="hero">
+    <img src="/static/images/logo.png" alt="MyQuantDesk Logo" class="logo" />
     <h1>MyQuantDesk</h1>
     <p>
-      Quantitative research and practical tools for Indian derivatives traders.
-      Built to combine professional-grade analytics with clear, actionable insights.
+      Quantitative research for financial markets, sectors, and individual companies.
+      Our mission is to empower investors and traders with data-driven insights and tools
+      to support long-term wealth creation.
     </p>
   </div>
 
@@ -109,23 +124,27 @@
   <h2 class="section-title">What we do</h2>
   <div class="card">
     <p>
-      MyQuantDesk focuses on research-driven tools for NIFTY options and other Indian derivatives.
-      We blend quantitative models with trader-friendly interfaces to help you:
+      MyQuantDesk builds research frameworks and analytical tools across asset classes and market segments.
+      We combine quantitative models, fundamental analysis, and market microstructure to:
     </p>
     <ul>
-      <li>Understand market positioning through option chain analytics.</li>
-      <li>Evaluate strategies using Greeks and scenario analysis.</li>
-      <li>Learn core concepts with concise, India-specific explanations.</li>
+      <li>Analyze markets, sectors, and companies using systematic approaches.</li>
+      <li>Develop tools for risk assessment, scenario analysis, and strategy evaluation.</li>
+      <li>Provide educational content that bridges quantitative concepts and practical trading/investing.</li>
     </ul>
+    <p>
+      Our current live tools include analytics for Indian derivatives (NIFTY options),
+      with more research modules and dashboards under development.
+    </p>
   </div>
 
   <!-- Research & tools -->
   <h2 class="section-title">Research & tools</h2>
   <div class="tools-grid">
     <div class="tool-card">
-      <h3>NIFTY Options</h3>
+      <h3>NIFTY Options Analytics</h3>
       <p>
-        Live option chain with Greeks, OI, IV, PCR, and key levels. Strategy playbook and Greek risk meter included.
+        Live option chain with Greeks, OI, IV, PCR, and key levels. Strategy playbook, Greek risk meter, and educational content.
       </p>
       <a href="/options">Explore NIFTY Options →</a>
     </div>
@@ -133,7 +152,7 @@
     <div class="tool-card">
       <h3>Options Lab</h3>
       <p>
-        Short articles on delta, gamma, theta, vega, and IV/OI, explained with NIFTY examples.
+        Concise articles on delta, gamma, theta, vega, and IV/OI, explained with NIFTY examples for traders and investors.
       </p>
       <a href="/options/learn">Open Options Lab →</a>
     </div>
@@ -141,7 +160,7 @@
     <div class="tool-card">
       <h3>Coming soon</h3>
       <p>
-        Additional research tools, backtesting frameworks, and advanced analytics for Indian derivatives.
+        Additional research modules covering broader market analytics, sector studies, and company-level quantitative frameworks.
       </p>
       <span style="color:var(--muted);font-size:0.95rem;">Stay tuned.</span>
     </div>
@@ -151,7 +170,7 @@
   <h2 class="section-title">Business enquiries / Contact Us</h2>
   <div class="contact-box">
     <p>
-      For collaborations, data licensing, or feedback, reach out at:
+      For collaborations, research partnerships, or feedback, reach out at:
       <br />
       <strong>contact@myquantdesk.in</strong>
     </p>
