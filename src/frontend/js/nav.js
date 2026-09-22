@@ -19,6 +19,7 @@ function renderOptionsTabs(activeTab) {
     { key: 'chain', label: 'Option Chain', href: '/options/options-chain' },
     { key: 'playbook', label: 'Greeks-Based Playbook', href: '/options/options-playbook' },
     { key: 'greek-meter', label: 'Greek Risk Meter', href: '/options/greek-meter' },
+    { key: 'learn', label: 'Options Lab', href: '/options/learn' },
   ];
 
   let html = '<div class="options-tabs">';
