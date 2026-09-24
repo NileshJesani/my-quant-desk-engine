@@ -49,6 +49,15 @@ a:hover {
   text-decoration: underline;
 }
 
+.logo {
+  height: 144px;
+  width: auto;
+  max-width: 125%;
+  object-fit: contain;
+  margin-bottom: 16px;
+  background: transparent; /* ensure no background */
+}
+
 /* Top navigation */
 .top-nav {
   margin-bottom: 16px;
