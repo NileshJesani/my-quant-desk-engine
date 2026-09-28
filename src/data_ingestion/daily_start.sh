@@ -19,7 +19,7 @@ log_msg "=== Starting daily Fyers token refresh ==="
 
 # 1) Refresh access token inside the app container
 log_msg "Running fyers_auth_token.py --token in container"
-docker compose exec -T app python fyers_auth_token.py --token
+docker compose exec -T app python /app/src/data_ingestion/fyers_auth_token.py --token
 log_msg "fyers_auth_token.py --token completed in container"
 
 # 2) Rebuild & restart containers so app sees updated .env
